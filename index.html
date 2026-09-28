@@ -1,0 +1,2764 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Portafolio 2026 — Live Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════ */
+:root {
+  --bg:        #000000;
+  --bg2:       #0a0a0a;
+  --card:      #111111;
+  --card-solid:#111111;
+  --border:    #222222;
+  --border2:   #333333;
+  --accent:    #60a5fa;
+  --accent2:   #93c5fd;
+  --green:     #4ade80;
+  --green2:    #86efac;
+  --red:       #f87171;
+  --red2:      #fca5a5;
+  --yellow:    #fbbf24;
+  --yellow2:   #fde68a;
+  --purple:    #c084fc;
+  --purple2:   #d8b4fe;
+  --teal:      #2dd4bf;
+  --teal2:     #5eead4;
+  --orange:    #fb923c;
+  --text:      #ffffff;
+  --text2:     #e5e7eb;
+  --muted:     #6b7280;
+  --muted2:    #9ca3af;
+
+  --radius-sm: 8px;
+  --radius:    12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow:    0 4px 20px rgba(0,0,0,0.5);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
+  --shadow-glow: 0 0 30px rgba(79,158,255,0.15);
+
+  --font:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', 'Fira Code', monospace;
+  --trans: all .2s cubic-bezier(.4,0,.2,1);
+}
+
+/* ═══════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: #000000;
+  color: #ffffff;
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Subtle dot grid on black */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap {
+  position: relative;
+  z-index: 1;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 20px 16px;
+}
+
+/* ═══════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════ */
+.hdr {
+  background: #0d0d0d;
+  border: 1px solid #2a2a2a;
+  border-radius: var(--radius-xl);
+  padding: 24px 28px 0;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Accent line at top of header */
+.hdr::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #60a5fa, #c084fc, #4ade80);
+  border-radius: 20px 20px 0 0;
+}
+
+.hdr-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.hdr-lbl {
+  color: var(--muted2);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.hdr-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #ffffff;
+}
+
+.total-val {
+  font-size: 28px;
+  font-weight: 800;
+  font-family: var(--mono);
+  color: var(--accent2);
+  letter-spacing: -1px;
+  text-shadow: 0 0 20px rgba(96,165,250,0.5);
+}
+
+.total-gain {
+  font-size: 13px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* Update bar */
+.ubar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+}
+
+.rbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, var(--accent), #3b82f6);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 7px 18px;
+  font-size: 12px;
+  font-family: var(--font);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--trans);
+  box-shadow: 0 2px 12px rgba(79,158,255,0.35);
+  letter-spacing: 0.3px;
+}
+.rbtn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(79,158,255,0.5); }
+.rbtn:active { transform: translateY(0); }
+.rbtn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+.dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  margin-right: 5px;
+  vertical-align: middle;
+  box-shadow: 0 0 8px var(--green);
+}
+.dot.spin { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); animation: pulse 1s infinite; }
+.dot.err  { background: var(--red);    box-shadow: 0 0 8px var(--red); }
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+.ust { font-size: 12px; color: var(--muted2); font-weight: 500; }
+
+#proxy-status { font-size: 10px; color: var(--muted); padding: 2px 0 6px; }
+
+/* ═══════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════ */
+.tabs {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  border-top: 1px solid #1e1e1e;
+  padding-top: 4px;
+  margin: 0 -28px;
+  padding-left: 28px;
+  padding-right: 28px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  background: transparent;
+  color: var(--muted2);
+  border: none;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: var(--trans);
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+.tab:hover:not(.on) { color: var(--text2); border-bottom-color: var(--border2); }
+.tab.on {
+  color: #93c5fd;
+  border-bottom-color: #60a5fa;
+  font-weight: 700;
+  background: transparent;
+}
+
+.panel { display: none; }
+.panel.on {
+  display: block;
+  animation: fadeIn .25s ease;
+}
+@keyframes fadeIn { from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none} }
+
+/* ═══════════════════════════════════════════
+   METRIC CARDS
+═══════════════════════════════════════════ */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.mc {
+  background: #111111;
+  border: 1px solid #222222;
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  transition: var(--trans);
+  position: relative;
+  overflow: hidden;
+}
+
+.mc:hover {
+  border-color: var(--border2);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.mc-lbl {
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+}
+.mc-val {
+  font-size: 22px;
+  font-weight: 800;
+  margin-top: 6px;
+  font-family: var(--mono);
+  letter-spacing: -0.5px;
+}
+.mc-sub {
+  color: var(--muted2);
+  font-size: 11px;
+  margin-top: 4px;
+  font-weight: 400;
+}
+
+/* ═══════════════════════════════════════════
+   SECTIONS
+═══════════════════════════════════════════ */
+.sec {
+  background: #0f0f0f;
+  border: 1px solid #1e1e1e;
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 14px;
+  transition: border-color .2s;
+}
+.sec:hover { border-color: #333333; }
+
+.sec-ttl {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted2);
+  font-weight: 700;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sec-ttl::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ═══════════════════════════════════════════
+   BAR ROWS
+═══════════════════════════════════════════ */
+.br {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.bl {
+  width: 48px;
+  font-size: 11px;
+  color: var(--muted2);
+  text-align: right;
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-weight: 600;
+}
+.bt {
+  flex: 1;
+  background: #1a1a1a;
+  border-radius: 6px;
+  height: 20px;
+  overflow: hidden;
+}
+.bf {
+  height: 100%;
+  border-radius: 6px;
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+}
+.bv {
+  width: 84px;
+  font-size: 11px;
+  text-align: right;
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════
+   TABLE
+═══════════════════════════════════════════ */
+.tbl { width: 100%; border-collapse: separate; border-spacing: 0; }
+
+.tbl th {
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  font-family: var(--font);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  background: #111111;
+  z-index: 2;
+}
+.tbl th.r, .tbl td.r { text-align: right; }
+
+.tbl td {
+  padding: 10px 10px;
+  border-bottom: 1px solid #1a1a1a;
+  font-size: 12px;
+  vertical-align: middle;
+  white-space: nowrap;
+  transition: background .15s;
+}
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: #1a1a1a; }
+
+.tbadge {
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--mono);
+  letter-spacing: 0.5px;
+}
+
+/* ═══════════════════════════════════════════
+   BADGES — PE / FPE / PEG
+═══════════════════════════════════════════ */
+.pe-cheap  { background: rgba(34,197,94,.15);  color: var(--green2);  border-radius:6px; padding:3px 8px; font-size:11px; font-weight:700; font-family:var(--mono); }
+.pe-fair   { background: rgba(245,158,11,.15); color: var(--yellow2); border-radius:6px; padding:3px 8px; font-size:11px; font-weight:700; font-family:var(--mono); }
+.pe-rich   { background: rgba(239,68,68,.15);  color: var(--red2);    border-radius:6px; padding:3px 8px; font-size:11px; font-weight:700; font-family:var(--mono); }
+.pe-na     { background: rgba(255,255,255,.06); color: var(--muted2); border-radius:6px; padding:3px 8px; font-size:11px; font-weight:700; font-family:var(--mono); }
+
+.fpe-cheap { background: rgba(20,184,166,.15); color: var(--teal2);   border-radius:6px; padding:3px 8px; font-size:11px; font-weight:700; font-family:var(--mono); }
+.fpe-fair  { background: rgba(249,115,22,.15); color: var(--orange);  border-radius:6px; padding:3px 8px; font-size:11px; font-weight:700; font-family:var(--mono); }
+.fpe-rich  { background: rgba(168,85,247,.15); color: var(--purple2); border-radius:6px; padding:3px 8px; font-size:11px; font-weight:700; font-family:var(--mono); }
+.fpe-na    { background: rgba(255,255,255,.06); color: var(--muted2); border-radius:6px; padding:3px 8px; font-size:11px; font-weight:700; font-family:var(--mono); }
+
+.peg-value { background: rgba(20,184,166,.15); color: var(--teal2);   border-radius:6px; padding:3px 8px; font-size:11px; font-weight:700; font-family:var(--mono); }
+.peg-fair  { background: rgba(245,158,11,.15); color: var(--yellow2); border-radius:6px; padding:3px 8px; font-size:11px; font-weight:700; font-family:var(--mono); }
+.peg-high  { background: rgba(239,68,68,.15);  color: var(--red2);    border-radius:6px; padding:3px 8px; font-size:11px; font-weight:700; font-family:var(--mono); }
+.peg-na    { background: rgba(255,255,255,.06); color: var(--muted2); border-radius:6px; padding:3px 8px; font-size:11px; font-weight:700; font-family:var(--mono); }
+
+/* ═══════════════════════════════════════════
+   STRESS / PROBABILITY ROWS
+═══════════════════════════════════════════ */
+.srow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #1a1a1a;
+  transition: background .15s;
+}
+.srow:last-child { border-bottom: none; }
+.srow:hover { background: #1a1a1a; border-radius: 8px; padding: 10px 8px; margin: 0 -8px; }
+
+.prow { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+.pt { flex:1; background:#222222; border-radius:8px; height:10px; overflow:hidden; }
+.pf { height:100%; border-radius:8px; transition:width .8s cubic-bezier(.4,0,.2,1); }
+.pp { font-weight:800; font-size:18px; min-width:52px; text-align:right; font-family:var(--mono); }
+
+/* ═══════════════════════════════════════════
+   PEG EXPLAINER
+═══════════════════════════════════════════ */
+.peg-explainer {
+  background: #0d0d0d;
+  border: 1px solid #1e3a5f;
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 14px;
+}
+.peg-formula {
+  background: #0a0a0a;
+  border: 1px solid #2a4a7a;
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  margin: 14px 0;
+  text-align: center;
+  font-size: 17px;
+  font-weight: 700;
+  color: #93c5fd;
+  letter-spacing: 1px;
+  font-family: var(--mono);
+}
+.peg-rule {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+  padding: 12px 16px;
+  background: #0a0a0a;
+  border-radius: var(--radius);
+  border-left: 3px solid;
+}
+.peg-examples { display:flex; gap:12px; flex-wrap:wrap; margin-top:14px; }
+.peg-ex {
+  flex:1; min-width:150px;
+  background: #0d0d0d;
+  border: 1px solid #222222;
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+  transition: var(--trans);
+}
+.peg-ex:hover { transform:translateY(-3px); box-shadow: var(--shadow); }
+
+/* ═══════════════════════════════════════════
+   INPUTS (Gestionar)
+═══════════════════════════════════════════ */
+.g-input {
+  background: #0a0a0a;
+  border: 1px solid #333333;
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 13px;
+  transition: var(--trans);
+  outline: none;
+  width: 100%;
+}
+.g-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,158,255,0.15);
+}
+.g-input::placeholder { color: var(--muted); }
+
+.g-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: var(--radius);
+  padding: 10px 20px;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--trans);
+  letter-spacing: 0.3px;
+}
+.g-btn:hover { transform:translateY(-1px); }
+.g-btn-buy  { background: linear-gradient(135deg, #22c55e, #16a34a); color:#fff; box-shadow: 0 2px 12px rgba(34,197,94,0.3); }
+.g-btn-sell { background: linear-gradient(135deg, #ef4444, #dc2626); color:#fff; box-shadow: 0 2px 12px rgba(239,68,68,0.3); }
+.g-btn-edit { background: linear-gradient(135deg, #f59e0b, #d97706); color:#000; box-shadow: 0 2px 12px rgba(245,158,11,0.3); }
+.g-btn-ghost { background: #1a1a1a; color:var(--muted2); border:1px solid #333333; }
+
+/* Action buttons in table */
+.act-btn {
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: var(--trans);
+  border: 1px solid;
+  margin-right: 3px;
+}
+.act-btn:hover { transform:translateY(-1px); }
+.act-buy  { background:rgba(34,197,94,.1);  color:var(--green2);  border-color:rgba(34,197,94,.3); }
+.act-sell { background:rgba(239,68,68,.1);  color:var(--red2);    border-color:rgba(239,68,68,.3); }
+.act-edit { background:rgba(245,158,11,.1); color:var(--yellow2); border-color:rgba(245,158,11,.3); }
+
+/* ═══════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════ */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn .2s ease;
+}
+.modal-box {
+  display: none;
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: #111111;
+  border: 1px solid #333333;
+  border-radius: var(--radius-xl);
+  padding: 28px;
+  z-index: 101;
+  min-width: 320px;
+  max-width: 440px;
+  width: 92%;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.9);
+  animation: slideUp .25s cubic-bezier(.4,0,.2,1);
+}
+@keyframes slideUp {
+  from { opacity:0; transform:translate(-50%,-46%); }
+  to   { opacity:1; transform:translate(-50%,-50%); }
+}
+
+/* ═══════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════ */
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:#333333; border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:#444444; }
+
+/* ═══════════════════════════════════════════
+   CANVAS
+═══════════════════════════════════════════ */
+canvas { display:block; border-radius:var(--radius); }
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+.footer {
+  margin-top: 24px;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 2;
+  padding: 16px;
+  border-top: 1px solid #1e1e1e;
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width:640px) {
+  .hdr { padding: 18px 18px 0; }
+  .tabs { margin: 0 -18px; padding-left:18px; padding-right:18px; }
+  .hdr-title { font-size:18px; }
+  .total-val { font-size:22px; }
+  .mc-val { font-size:18px; }
+  .cards { grid-template-columns: repeat(2, 1fr); gap:8px; }
+  .sec { padding:14px; }
+  .tbl th, .tbl td { padding:8px 6px; font-size:11px; }
+  .modal-box { width:96%; padding:20px; }
+}
+
+/* ═══════════════════════════════════════════
+   UTILITY
+═══════════════════════════════════════════ */
+.text-green  { color: var(--green2) !important; }
+.text-red    { color: var(--red2) !important; }
+.text-yellow { color: var(--yellow2) !important; }
+.text-accent { color: var(--accent2) !important; }
+.text-muted  { color: var(--muted2) !important; }
+.font-mono   { font-family: var(--mono) !important; }
+.fw-800      { font-weight: 800 !important; }
+
+/* Diagnóstico items */
+.diag-item {
+  display:flex; gap:10px; margin-bottom:12px;
+  padding:12px 14px;
+  background: #0f0f0f;
+  border-radius:var(--radius);
+  border: 1px solid #1e1e1e;
+  transition: var(--trans);
+}
+.diag-item:hover { background:#1a1a1a; }
+
+/* Chip/tag */
+.chip {
+  display:inline-flex; align-items:center;
+  background:#1a1a1a;
+  border:1px solid #333333;
+  border-radius:20px;
+  padding:2px 10px;
+  font-size:10px;
+  font-weight:600;
+  color:var(--muted2);
+  font-family:var(--font);
+}
+
+/* ── Glosario Cards ── */
+.glos-card{background:#0f0f0f;border:1px solid #1e1e1e;border-left:3px solid;border-radius:var(--radius);cursor:pointer;transition:var(--trans);overflow:hidden;}
+.glos-card:hover{background:#141414;}
+.glos-header{display:flex;align-items:center;gap:10px;padding:14px 16px;}
+.glos-title{flex:1;font-size:14px;font-weight:700;}
+.glos-arrow{color:var(--muted);font-size:11px;transition:var(--trans);}
+.glos-body{display:none;padding:0 16px 16px;border-top:1px solid #1a1a1a;}
+.glos-formula{background:#000;border:1px solid #222;border-radius:8px;padding:10px 14px;font-family:var(--mono);font-size:11px;color:var(--accent2);margin:12px 0;line-height:1.6;}
+.glos-section{font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:8px;}
+.glos-label{font-weight:700;color:var(--muted2);font-size:10px;text-transform:uppercase;letter-spacing:0.8px;margin-right:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ══════════ HEADER ══════════ -->
+  <div class="hdr">
+    <div class="hdr-top">
+      <div>
+        <div class="hdr-lbl">📊 Dashboard Live · Yahoo Finance · Actualizado 26/Sep/2026</div>
+        <div class="hdr-title">Mi Portafolio 2026</div>
+      </div>
+      <div style="text-align:right">
+        <div class="hdr-lbl">Valor Total Actual</div>
+        <div class="total-val" id="hdr-total">—</div>
+        <div class="total-gain" id="hdr-gain">Cargando precios...</div>
+      </div>
+    </div>
+    <div class="ubar">
+      <button class="rbtn" id="rbtn" onclick="fetchAll()">⟳ Actualizar precios</button>
+      <span class="ust"><span class="dot" id="sdot"></span><span id="stxt">Iniciando...</span></span>
+      <span class="ust" id="slast"></span>
+    </div>
+    <div id="proxy-status"></div>
+    <div class="tabs">
+      <button class="tab on"  onclick="setTab('resumen')">Resumen</button>
+      <button class="tab"     onclick="setTab('grafica')">Gráfica</button>
+      <button class="tab"     onclick="setTab('posiciones')">Posiciones</button>
+      <button class="tab"     onclick="setTab('peg')">PEG Ratio</button>
+      <button class="tab"     onclick="setTab('riesgo')">Riesgo</button>
+      <button class="tab"     onclick="setTab('montecarlo')">Monte Carlo</button>
+      <button class="tab"     onclick="setTab('glosario')" style="color:var(--yellow2)">📖 Glosario</button>
+      <button class="tab"     onclick="setTab('gestionar')" style="color:var(--green2)">⚙ Gestionar</button>
+    </div>
+  </div>
+
+  <div id="p-resumen"    class="panel on"></div>
+  <div id="p-grafica"    class="panel"></div>
+  <div id="p-posiciones" class="panel"></div>
+  <div id="p-peg"        class="panel"></div>
+  <div id="p-riesgo"     class="panel"></div>
+  <div id="p-montecarlo" class="panel"></div>
+  <div id="p-glosario"   class="panel"></div>
+  <div id="p-gestionar"  class="panel"></div>
+
+  <div class="footer">
+    Precios · P/E Trailing · P/E Forward · PEG Ratio — actualizados live via Yahoo Finance<br>
+    YTD 2026 desde precio cierre 31-Dic-2025 · EPS growth = consenso analistas NTM<br>
+    <span style="color:var(--red);opacity:.5">⚠ No constituye asesoría de inversión</span>
+  </div>
+</div>
+
+<script>
+// ─── HOLDINGS ─────────────────────────────────────────────────────────────────
+// epsGrowth = tasa de crecimiento EPS estimada NTM (próx. 12 meses) — consenso analistas
+// Fuentes: GuruFocus, StockAnalysis, SimplyWallSt, MacroTrends — Jun 2026
+// PEG = Forward PE / epsGrowth
+const H = [
+  {t:"AAPL", n:"Apple", s:1.94075, cost:257.63, totalInv:499.99, beta:1.24, sec:"Tech US", sc:"#58a6ff", pe_s:33.0, fpe_s:30.9, eps_s:8.26, epsG:14.0},
+  {t:"ASML", n:"ASML Holding", s:0.25393, cost:1433.52, totalInv:364.02, beta:1.29, sec:"Semicon", sc:"#cae8ff", pe_s:57.3, fpe_s:43.7, eps_s:33.68, epsG:18.0},
+  {t:"BSX", n:"Boston Scientific", s:7.39554, cost:44.0, totalInv:325.39, beta:0.92, sec:"Salud", sc:"#06b6d4", pe_s:78.2, fpe_s:48.3, eps_s:0.57, epsG:14.0},
+  {t:"COST", n:"Costco", s:0.34623, cost:1010.85, totalInv:349.99, beta:0.82, sec:"Defensivo", sc:"#7ee787", pe_s:55.2, fpe_s:47.3, eps_s:17.23, epsG:10.0},
+  {t:"CRM", n:"Salesforce", s:1.68735, cost:210.95, totalInv:355.95, beta:1.31, sec:"Software", sc:"#d2a8ff", pe_s:17.0, fpe_s:13.1, eps_s:8.93, epsG:19.0},
+  {t:"EWY", n:"iShares South Korea", s:2.96902, cost:183.63, totalInv:545.21, beta:1.45, sec:"ETF Korea", sc:"#39d353", pe_s:12.5, fpe_s:11.8, eps_s:17.54, epsG:12.0},
+  {t:"FUTU", n:"Futu Holdings", s:3.75402, cost:106.8, totalInv:400.93, beta:1.82, sec:"Fintech Asia", sc:"#ffa657", pe_s:14.8, fpe_s:11.2, eps_s:6.53, epsG:22.0},
+  {t:"GOOGL", n:"Alphabet", s:1.67639, cost:334.1, totalInv:560.09, beta:1.06, sec:"Tech US", sc:"#4f9eff", pe_s:29.4, fpe_s:26.3, eps_s:13.24, epsG:17.0},
+  {t:"LLY", n:"Eli Lilly", s:0.29235, cost:1181.49, totalInv:345.42, beta:0.72, sec:"Salud", sc:"#f0abfc", pe_s:60.2, fpe_s:42.1, eps_s:13.68, epsG:38.0},
+  {t:"MELI", n:"MercadoLibre", s:0.25626, cost:1560.83, totalInv:399.99, beta:1.41, sec:"Fintech EM", sc:"#ffa198", pe_s:44.8, fpe_s:32.5, eps_s:36.5, epsG:28.0},
+  {t:"META", n:"Meta Platforms", s:0.88061, cost:624.09, totalInv:549.59, beta:1.28, sec:"Tech US", sc:"#ff7b72", pe_s:21.0, fpe_s:17.3, eps_s:27.23, epsG:21.0},
+  {t:"MU", n:"Micron Technology", s:0.90419, cost:594.04, totalInv:537.13, beta:1.62, sec:"Semicon", sc:"#e3b341", pe_s:51.4, fpe_s:10.1, eps_s:21.46, epsG:170.0},
+  {t:"NU", n:"Nu Holdings", s:31.02162, cost:12.11, totalInv:375.57, beta:1.53, sec:"Fintech EM", sc:"#f78166", pe_s:69.5, fpe_s:28.4, eps_s:0.18, epsG:35.0},
+  {t:"PEP", n:"PepsiCo", s:1.9935, cost:150.58, totalInv:300.19, beta:0.58, sec:"Defensivo", sc:"#8b949e", pe_s:18.4, fpe_s:17.1, eps_s:7.72, epsG:5.0},
+  {t:"QQQ", n:"Invesco QQQ", s:1.42249, cost:613.48, totalInv:872.67, beta:1.18, sec:"ETF Tech", sc:"#79c0ff", pe_s:32.1, fpe_s:28.6, eps_s:23.1, epsG:15.0},
+  {t:"SCHD", n:"US Dividend Equity", s:10.68119, cost:27.72, totalInv:296.05, beta:0.78, sec:"ETF Dividend", sc:"#3fb950", pe_s:17.2, fpe_s:16.8, eps_s:1.85, epsG:7.0},
+  {t:"STX", n:"Seagate Technology", s:0.53444, cost:815.16, totalInv:435.66, beta:1.48, sec:"Semicon", sc:"#a5d6ff", pe_s:53.4, fpe_s:18.7, eps_s:20.04, epsG:65.0},
+  {t:"TSM", n:"Taiwan Semicon.", s:1.28099, cost:421.77, totalInv:540.28, beta:1.35, sec:"Semicon", sc:"#bc8cff", pe_s:34.8, fpe_s:29.6, eps_s:12.04, epsG:35.0},
+  {t:"VOO", n:"S&P 500 Vanguard", s:0.88233, cost:633.04, totalInv:558.55, beta:1.0, sec:"ETF Broad", sc:"#56d364", pe_s:23.4, fpe_s:21.8, eps_s:29.36, epsG:12.0},
+];
+
+const RF=4.3, SPY_YTD=10.0;
+const SNAP={
+  AAPL:341.07,
+  ASML:1743.94,
+  BSX:43.92,
+  COST:922.77,
+  CRM:234.02,
+  EWY:187.18,
+  FUTU:111.87,
+  GOOGL:343.92,
+  LLY:1183.46,
+  MELI:1752.61,
+  META:751.66,
+  MU:1082.28,
+  NU:13.59,
+  PEP:128.63,
+  QQQ:744.5,
+  SCHD:33.21,
+  STX:916.83,
+  TSM:450.61,
+  VOO:710.79,
+};
+
+let live={}, peData={}, mcR=null;
+
+// ─── FETCH: 3 proxies en cascada ─────────────────────────────────────────────
+const YF_BASE='https://query1.finance.yahoo.com/v7/finance/quote';
+const YF_FIELDS='regularMarketPrice,trailingPE,forwardPE,epsTrailingTwelveMonths,epsForward,beta,fiftyTwoWeekHigh,fiftyTwoWeekLow';
+let TC_MXN=18.50;
+const YAHOO_QUOTE = s =>
+  `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${s}` +
+  `&fields=regularMarketPrice,trailingPE,forwardPE,epsTrailingTwelveMonths,epsForward,beta,fiftyTwoWeekHigh,fiftyTwoWeekLow`;
+
+// ── Yahoo Finance v7 quote endpoint ──────────────────────────────────────────
+
+// Proxies en orden de confiabilidad — todos probados Sep 2026
+const PROXY_LIST = [
+  u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+  u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+  u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+  u => `https://corsproxy.org/?${encodeURIComponent(u)}`,
+];
+const PROXY_NAMES = ['corsproxy.io','allorigins.win','codetabs.com','corsproxy.org'];
+
+async function fetchVia(rawUrl) {
+  for(let i=0;i<PROXY_LIST.length;i++){
+    try{
+      const ctrl=new AbortController();
+      const tid=setTimeout(()=>ctrl.abort(),10000);
+      const proxyUrl=PROXY_LIST[i](rawUrl);
+      const r=await fetch(proxyUrl,{
+        headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'},
+        signal:ctrl.signal
+      });
+      clearTimeout(tid);
+      if(!r.ok) throw new Error(`HTTP ${r.status}`);
+      const text=await r.text();
+      if(!text||text.length<10) throw new Error('Empty response');
+      let json;
+      try{ json=JSON.parse(text); }catch{ throw new Error('JSON parse failed'); }
+      // allorigins wraps in {contents:"..."}
+      if(json?.contents){
+        try{ json=JSON.parse(json.contents); }catch{ throw new Error('Nested parse failed'); }
+      }
+      // Validate structure
+      if(!json?.quoteResponse?.result) throw new Error('No quoteResponse');
+      const el=document.getElementById('proxy-status');
+      if(el) el.textContent=`✓ Conectado via ${PROXY_NAMES[i]}`;
+      return json;
+    }catch(e){
+      console.warn(`Proxy ${PROXY_NAMES[i]} falló:`,e.message);
+    }
+  }
+  const el=document.getElementById('proxy-status');
+  if(el) el.textContent='⚠ Sin conexión — descarga y abre en Chrome con internet activo';
+  return null;
+}
+
+async function fetchBatch(tickers){
+  const url=`${YF_BASE}?symbols=${tickers.join(',')}&fields=${YF_FIELDS}`;
+  const json=await fetchVia(url);
+  if(!json) return null;
+  const out={};
+  (json?.quoteResponse?.result||[]).forEach(q=>{
+    out[q.symbol]={
+      price:q.regularMarketPrice, pe:q.trailingPE,
+      fpe:q.forwardPE, eps:q.epsTrailingTwelveMonths,
+      epsF:q.epsForward, betaL:q.beta,
+      hi52:q.fiftyTwoWeekHigh, lo52:q.fiftyTwoWeekLow,
+    };
+  });
+  return out;
+}
+
+async function fetchAll(){
+  const btn=document.getElementById('rbtn');
+  const dot=document.getElementById('sdot');
+  const stxt=document.getElementById('stxt');
+  btn.disabled=true; dot.className='dot spin';
+  stxt.textContent='Conectando a Yahoo Finance...';
+  document.getElementById('proxy-status').textContent='Probando proxies...';
+
+  const tickers=H.map(h=>h.t);
+  const [b1,b2,tcRes]=await Promise.all([
+    fetchBatch(tickers.slice(0,10)),
+    fetchBatch(tickers.slice(10)),
+    fetchBatch(['MXN=X'])   // USD/MXN tipo de cambio live
+  ]);
+  const raw={...(b1||{}),...(b2||{})};
+  // Actualizar TC si viene de Yahoo
+  if(tcRes?.['MXN=X']?.price){
+    TC_MXN = tcRes['MXN=X'].price;
+    console.log('TC live USD/MXN:', TC_MXN);
+  }
+  let ok=0;
+  H.forEach(h=>{
+    const r=raw[h.t];
+    const price=r?.price||SNAP[h.t];
+    if(r?.price) ok++;
+    live[h.t]={price,ytd2026:((price-h.cost)/h.cost)*100,betaL:r?.betaL||h.beta,hi52:r?.hi52,lo52:r?.lo52};
+    peData[h.t]={pe:r?.pe??h.pe_s,fpe:r?.fpe??h.fpe_s,eps:r?.eps??h.eps_s,epsF:r?.epsF,live:!!r?.price};
+  });
+
+  dot.className=ok>0?'dot':'dot err';
+  stxt.textContent=ok>0?`✓ ${ok}/${H.length} tickers actualizados en vivo`:'Sin conexión — datos estáticos (19-Jun-2026)';
+  if(ok===0) document.getElementById('proxy-status').textContent=
+    '⚠ Todos los proxies fallaron. Necesitas internet activo en Chrome/Edge.';
+  document.getElementById('slast').textContent='  '+new Date().toLocaleTimeString('es-MX');
+  btn.disabled=false;
+  renderAll();
+  clearTimeout(window._ar);
+  window._ar=setTimeout(fetchAll,5*60*1000);
+}
+
+// ─── CÁLCULOS ─────────────────────────────────────────────────────────────────
+function calc(){
+  const rows=H.map(h=>{
+    const ld=live[h.t]||{price:SNAP[h.t],ytd2026:((SNAP[h.t]-h.cost)/h.cost)*100,betaL:h.beta};
+    const pd=peData[h.t]||{pe:h.pe_s,fpe:h.fpe_s,eps:h.eps_s};
+    const price=ld.price, ytd=ld.ytd2026;
+    const value=price*h.s, costV=h.cost*h.s, gain=value-costV;
+    // PEG = Forward PE / EPS growth rate (%)
+    const peg=(pd.fpe&&h.epsG&&h.epsG>0)?(pd.fpe/h.epsG):null;
+    return{...h,price,ytd,value,costV,gain,beta:ld.betaL||h.beta,
+      pe:pd.pe,fpe:pd.fpe,eps:pd.eps,epsF:pd.epsF,peg,peLive:pd.live,hi52:ld.hi52,lo52:ld.lo52};
+  });
+  const total=rows.reduce((a,r)=>a+r.value,0);
+  rows.forEach(r=>r.w=r.value/total);
+  const totalCost=rows.reduce((a,r)=>a+r.costV,0);
+  const totalGain=total-totalCost;
+  const portRet=rows.reduce((a,r)=>a+r.w*r.ytd,0);
+  const portBeta=rows.reduce((a,r)=>a+r.w*r.beta,0);
+  const variance=rows.reduce((a,r)=>a+r.w*Math.pow(r.ytd-portRet,2),0);
+  const annVol=Math.sqrt(variance)*Math.sqrt(12);
+  const alpha=portRet-(RF+portBeta*(SPY_YTD-RF));
+  const sharpe=(portRet-RF)/Math.max(annVol,1);
+  const winUSD=rows.filter(r=>r.ytd>0).reduce((a,r)=>a+Math.abs(r.gain),0);
+  const loseUSD=rows.filter(r=>r.ytd<0).reduce((a,r)=>a+Math.abs(r.gain),0);
+  const pf=loseUSD>0?winUSD/loseUSD:winUSD;
+  const rPE=rows.filter(r=>r.pe&&r.pe>0&&r.pe<400);
+  const rFPE=rows.filter(r=>r.fpe&&r.fpe>0&&r.fpe<200);
+  const rPEG=rows.filter(r=>r.peg&&r.peg>0&&r.peg<30);
+  const wPE=rPE.reduce((a,r)=>a+r.w,0),wFPE=rFPE.reduce((a,r)=>a+r.w,0),wPEG=rPEG.reduce((a,r)=>a+r.w,0);
+  const portPE=wPE>0?rPE.reduce((a,r)=>a+r.w*r.pe,0)/wPE:0;
+  const portFPE=wFPE>0?rFPE.reduce((a,r)=>a+r.w*r.fpe,0)/wFPE:0;
+  const portPEG=wPEG>0?rPEG.reduce((a,r)=>a+r.w*r.peg,0)/wPEG:0;
+  return{rows,total,totalCost,totalGain,portRet,portBeta,annVol,alpha,sharpe,pf,portPE,portFPE,portPEG};
+}
+
+function mcSim(tv,annRet,annVol,months,sims){
+  const mR=annRet/100/12,mV=annVol/100/Math.sqrt(12);
+  const res=[];
+  for(let i=0;i<sims;i++){
+    let v=tv;
+    for(let m=0;m<months;m++){
+      const z=Math.sqrt(-2*Math.log(Math.random()))*Math.cos(2*Math.PI*Math.random());
+      v*=(1+mR+mV*z);
+    }
+    res.push(v);
+  }
+  res.sort((a,b)=>a-b);
+  return{
+    p10:res[Math.floor(sims*.10)],p25:res[Math.floor(sims*.25)],
+    p50:res[Math.floor(sims*.50)],p75:res[Math.floor(sims*.75)],
+    p90:res[Math.floor(sims*.90)],
+    probPos:res.filter(v=>v>tv).length/sims*100,
+    probUp10:res.filter(v=>v>tv*1.10).length/sims*100,
+    probDn10:res.filter(v=>v<tv*.90).length/sims*100,
+    all:res
+  };
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+const fu=v=>'$'+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
+const fuMXN=v=>'$'+Math.abs(v).toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0});
+const fp=v=>v?'$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
+const fpc=(v,d=1)=>(v>=0?'+':'')+v.toFixed(d)+'%';
+const cv=v=>v>=0?'var(--green)':'var(--red)';
+const ar=v=>v>=0?'▲':'▼';
+function card(lbl,val,sub,col){
+  return`<div class="mc">
+    <div class="mc-lbl">${lbl}</div>
+    <div class="mc-val" style="color:${col||'var(--text)'};text-shadow:0 0 20px ${col||'transparent'}44">${val}</div>
+    <div class="mc-sub">${sub||''}</div>
+  </div>`;
+}
+function brow(lbl,pct,col,rA,rB){
+  return`<div class="br">
+    <div class="bl">${lbl}</div>
+    <div class="bt"><div class="bf" style="width:${Math.min(pct,100)}%;background:${col}"></div></div>
+    ${rA?`<div style="width:40px;font-size:11px;color:var(--muted)">${rA}</div>`:''}
+    ${rB?`<div class="bv" style="color:${col}">${rB}</div>`:''}
+  </div>`;
+}
+function peBadge(pe){
+  if(!pe||pe<=0||pe>500) return`<span class="pe-na">N/A</span>`;
+  if(pe<20) return`<span class="pe-cheap">${pe.toFixed(1)}x</span>`;
+  if(pe<35) return`<span class="pe-fair">${pe.toFixed(1)}x</span>`;
+  return`<span class="pe-rich">${pe.toFixed(1)}x</span>`;
+}
+function fpeBadge(fpe){
+  if(!fpe||fpe<=0||fpe>300) return`<span class="fpe-na">N/A</span>`;
+  if(fpe<15) return`<span class="fpe-cheap">${fpe.toFixed(1)}x</span>`;
+  if(fpe<30) return`<span class="fpe-fair">${fpe.toFixed(1)}x</span>`;
+  return`<span class="fpe-rich">${fpe.toFixed(1)}x</span>`;
+}
+function pegBadge(peg){
+  if(!peg||peg<=0) return`<span class="peg-na">N/A</span>`;
+  if(peg<1) return`<span class="peg-value">${peg.toFixed(2)}</span>`;
+  if(peg<2) return`<span class="peg-fair">${peg.toFixed(2)}</span>`;
+  return`<span class="peg-high">${peg.toFixed(2)}</span>`;
+}
+
+// ─── RENDER ALL ───────────────────────────────────────────────────────────────
+function renderAll(){
+  const p=calc();
+  mcR=mcSim(p.total,15,p.annVol,6,1200);
+  document.getElementById('hdr-total').textContent=fu(p.total);
+  const ge=document.getElementById('hdr-gain');
+  const totalInvReal=H.reduce((s,h)=>s+(h.totalInv||h.cost*h.s),0);
+  const gainTotalReal=p.total-totalInvReal;
+  const gainTotalRealPct=(gainTotalReal/totalInvReal)*100;
+  const totalMXN=p.total*TC_MXN;
+  const gainMXN=gainTotalReal*TC_MXN;
+  const totalInvMXN=totalInvReal*TC_MXN;
+  ge.innerHTML=`
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:2px">
+      <span>
+        ${ar(gainTotalReal)} <b style="font-family:var(--mono)">${fu(gainTotalReal)}</b>
+        <span style="font-size:11px;opacity:.7"> USD total</span>
+        <span style="color:${cv(gainTotalReal)};font-family:var(--mono);margin-left:4px">(${gainTotalRealPct>=0?'+':''}${gainTotalRealPct.toFixed(1)}%)</span>
+      </span>
+      <span style="background:#1a2a1a;border:1px solid #166534;border-radius:6px;padding:2px 10px;font-size:12px">
+        🇲🇽 <b style="font-family:var(--mono);color:#4ade80">${fuMXN(totalMXN)}</b>
+        <span style="color:#4ade80;font-size:11px"> (+${fuMXN(gainMXN)} MXN)</span>
+      </span>
+      <span style="color:var(--muted);font-size:11px">
+        invertido: ${fu(totalInvReal)} USD · TC: <span id="tc-live" style="color:var(--yellow2)">$${TC_MXN.toFixed(2)}</span>
+      </span>
+    </div>`;
+  ge.style.color=cv(gainTotalReal);
+  // Actualizar chip TC
+  const tcEl=document.getElementById('tc-live');
+  if(tcEl) tcEl.textContent='$'+TC_MXN.toFixed(2);
+  rResumen(p); rGrafica(p); rPosiciones(p); rPEG(p); rRiesgo(p); rMonteCarlo(p); rGlosario();
+}
+
+/* ── RESUMEN ── */
+function rResumen(p){
+  const{portRet,alpha,sharpe,pf,portBeta,annVol,portPE,portFPE,portPEG,rows}=p;
+  const best=[...rows].sort((a,b)=>b.ytd-a.ytd)[0];
+  const worst=[...rows].sort((a,b)=>a.ytd-b.ytd)[0];
+  const maxA=Math.max(...rows.map(r=>Math.abs(r.gain)));
+  const wf=[...rows].sort((a,b)=>b.gain-a.gain).map(r=>{
+    const bw=Math.abs(r.gain)/maxA*100, col=r.gain>=0?'var(--green)':'var(--red)';
+    return brow(r.t,bw,col,'',`${r.gain>=0?'+':''}${fu(r.gain)}`);
+  }).join('');
+  const diag=[
+    {col:cv(alpha),txt:`Alpha ${fpc(alpha)}: ${alpha>=0?'<b>superas</b> al S&P 500':'<b>rezagado</b> vs S&P 500'} ajustado por riesgo. ${best.t} (${fpc(best.ytd,0)}) lidera el alpha.`},
+    {col:sharpe>=1?'var(--green)':'var(--yellow)',txt:`Sharpe ${sharpe.toFixed(2)}: ${sharpe>=1?'buena compensación riesgo/retorno.':sharpe>=0?'retorno moderado dado el riesgo.':'retorno insuficiente.'} Dispersión de MU (+161%) y EWY (+108%) infla volatilidad.`},
+    {col:'var(--yellow)',txt:`Profit Factor ${pf.toFixed(2)}x: por cada $1 perdido (${worst.t} ${fpc(worst.ytd,0)}), generas $${pf.toFixed(2)} en ganadoras.`},
+    {col:portBeta>1.3?'var(--red)':'var(--yellow)',txt:`Beta ${portBeta.toFixed(2)}: ${((portBeta-1)*100).toFixed(0)}% más volátil que el mercado. Caída S&P −10% → esperas ~−${(portBeta*10).toFixed(1)}%.`},
+    {col:'var(--purple)',txt:`PEG ponderado ${portPEG.toFixed(2)}: ${portPEG<1?'portafolio <b>barato relativo a su crecimiento</b>. MU (PEG 0.06) y STX (0.29) compensan posiciones con PEG alto.':'valuación razonable dado el crecimiento esperado.'} Ve la pestaña PEG Ratio para detalle completo.`},
+  ].map(d=>`<div class="diag-item">
+    <span style="color:${d.col};font-size:16px;margin-top:1px;flex-shrink:0">●</span>
+    <span style="font-size:13px;line-height:1.6;color:var(--text2)">${d.txt}</span></div>`).join('');
+
+  document.getElementById('p-resumen').innerHTML=`
+    <div class="cards">
+      ${card('Retorno YTD 2026',fpc(portRet),'Ponderado por peso',cv(portRet))}
+      ${card('Alpha vs S&P 500',fpc(alpha),'Benchmark: +'+SPY_YTD+'%',cv(alpha))}
+      ${card('Sharpe Ratio',sharpe.toFixed(2),'(Rp−Rf) / Volatilidad',sharpe>=1?'var(--green)':sharpe>=0?'var(--yellow)':'var(--red)')}
+      ${card('Profit Factor',pf.toFixed(2)+'x','Ganancias / Pérdidas',pf>=1.5?'var(--green)':'var(--yellow)')}
+    </div>
+    <div class="cards">
+      ${card('Beta Portafolio',portBeta.toFixed(3),'vs S&P 500 (β=1)',portBeta>1.3?'var(--yellow)':'var(--green)')}
+      ${card('P/E Trailing',portPE.toFixed(1)+'x','Prom. ponderado',portPE>40?'var(--red)':portPE>25?'var(--yellow)':'var(--green)')}
+      ${card('P/E Forward',portFPE.toFixed(1)+'x','Ganancias NTM estimadas','var(--purple)')}
+      ${card('PEG Ratio',portPEG.toFixed(2),'Fwd PE / Crecimiento EPS',portPEG<1?'var(--teal)':portPEG<2?'var(--yellow)':'var(--red)')}
+    </div>
+    ${(()=>{
+      const tinv=H.reduce((s,h)=>s+(h.totalInv||h.cost*h.s),0);
+      const gtot=p.total-tinv;
+      const gpct=(gtot/tinv)*100;
+      const best=[...rows].sort((a,b)=>b.gainTotalPct-a.gainTotalPct)[0];
+      const worst=[...rows].sort((a,b)=>a.gainTotalPct-b.gainTotalPct)[0];
+      return`<div class="sec" style="border-color:#1e3a5f">
+        <div class="sec-ttl" style="color:var(--accent2)">💼 Resumen Financiero del Portafolio</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">
+          <div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:10px;padding:14px">
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Total Invertido</div>
+            <div style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--text);margin-top:4px">${fu(tinv)}</div>
+            <div style="font-size:11px;color:var(--muted2);margin-top:2px">${fuMXN(tinv*TC_MXN)} MXN</div>
+          </div>
+          <div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:10px;padding:14px">
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Valor Actual</div>
+            <div style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--accent2);margin-top:4px">${fu(p.total)}</div>
+            <div style="font-size:11px;color:var(--teal2);margin-top:2px">🇲🇽 ${fuMXN(p.total*TC_MXN)} MXN</div>
+          </div>
+          <div style="background:#0a0a0a;border:1px solid ${gtot>=0?'#166534':'#7f1d1d'};border-radius:10px;padding:14px">
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Ganancia Total</div>
+            <div style="font-size:20px;font-weight:800;font-family:var(--mono);color:${cv(gtot)};margin-top:4px">${gtot>=0?'+':''}${fu(gtot)}</div>
+            <div style="font-size:11px;color:${cv(gtot)};margin-top:2px">${gpct>=0?'+':''}${gpct.toFixed(2)}% · ${gtot>=0?'+':''}${fuMXN(gtot*TC_MXN)} MXN</div>
+          </div>
+          <div style="background:#0a0a0a;border:1px solid #1e3a5f;border-radius:10px;padding:14px">
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">🇲🇽 Tipo de Cambio</div>
+            <div style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--yellow2);margin-top:4px">${TC_MXN.toFixed(2)}</div>
+            <div style="font-size:11px;color:var(--muted2);margin-top:2px">USD/MXN · live Yahoo</div>
+          </div>
+          <div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:10px;padding:14px">
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">🏆 Mejor inversión</div>
+            <div style="font-size:18px;font-weight:800;color:var(--green2);margin-top:4px">${best?.t||'—'}</div>
+            <div style="font-size:11px;color:var(--green2);margin-top:2px">+${best?.gainTotalPct?.toFixed(1)||0}% total</div>
+          </div>
+          <div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:10px;padding:14px">
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">⚠️ Menor retorno</div>
+            <div style="font-size:18px;font-weight:800;color:${cv(worst?.gainTotalPct||0)};margin-top:4px">${worst?.t||'—'}</div>
+            <div style="font-size:11px;color:${cv(worst?.gainTotalPct||0)};margin-top:2px">${worst?.gainTotalPct?.toFixed(1)||0}% total</div>
+          </div>
+        </div>
+      </div>`;
+    })()}
+    <div class="sec"><div class="sec-ttl">Contribución USD por Posición (YTD 2026)</div>${wf}</div>
+    <div class="sec"><div class="sec-ttl">⚡ Diagnóstico 2026</div>${diag}</div>`;
+}
+
+/* ── GRÁFICA ── */
+function rGrafica(p){
+  document.getElementById('p-grafica').innerHTML=`
+    <!-- 0. TREEMAP -->
+    <div class="sec">
+      <div class="sec-ttl">🗺️ Mapa del Portafolio — Tamaño = Peso · Color = Rendimiento YTD</div>
+      <div id="treemap-container" style="width:100%;min-height:420px;position:relative;border-radius:10px;overflow:hidden;background:#000;cursor:pointer"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;font-size:11px;align-items:center">
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:#166534;display:inline-block"></span> +20% o más</span>
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:#15803d;display:inline-block"></span> +10% a +20%</span>
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:#16a34a;display:inline-block"></span> 0% a +10%</span>
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:#dc2626;display:inline-block"></span> 0% a -10%</span>
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:#7f1d1d;display:inline-block"></span> -10% o menos</span>
+        <span style="color:var(--muted);font-size:10px">· Pasa el cursor para ver detalle · Tamaño proporcional al valor en portafolio</span>
+      </div>
+    </div>
+    <!-- 1. Rendimiento línea mejorada -->
+    <div class="sec">
+      <div class="sec-ttl">📈 Rendimiento del Portafolio vs S&P 500 — YTD 2026</div>
+      <canvas id="cv-port" width="900" height="340" style="width:100%"></canvas>
+      <div style="display:flex;gap:20px;margin-top:10px;font-size:11px;flex-wrap:wrap">
+        <span><span style="color:#58a6ff">●</span> Mi Portafolio</span>
+        <span><span style="color:#8b949e">●</span> S&P 500 (VOO)</span>
+        <span style="color:var(--muted);font-size:10px">· Retornos mensuales estimados con shocks reales 2026</span>
+      </div>
+    </div>
+    <!-- 2. Donut + leyenda lado a lado -->
+    <div class="sec">
+      <div class="sec-ttl">🥧 Distribución del Portafolio por Posición (%)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:center">
+        <div style="position:relative;flex-shrink:0">
+          <canvas id="cv-donut" width="300" height="300" style="display:block"></canvas>
+        </div>
+        <div id="donut-legend" style="flex:1;min-width:220px"></div>
+      </div>
+      <p style="font-size:10px;color:var(--muted2);margin-top:12px;text-align:center">
+        💡 Pasa el cursor sobre cada segmento para ver el detalle de esa posición
+      </p>
+    </div>
+    <!-- 3. YTD Barras horizontales mejoradas -->
+    <div class="sec">
+      <div class="sec-ttl">📊 Rendimiento YTD 2026 por Posición</div>
+      <canvas id="cv-ytd" width="900" height="360" style="width:100%"></canvas>
+    </div>
+    <!-- 4. PE Trailing vs Forward -->
+    <div class="sec">
+      <div class="sec-ttl">💹 P/E Trailing vs Forward por Posición</div>
+      <canvas id="cv-pe" width="900" height="300" style="width:100%"></canvas>
+      <div style="display:flex;gap:16px;margin-top:8px;font-size:10px;color:var(--muted)">
+        <span style="color:var(--accent)">■</span> P/E Trailing &nbsp;
+        <span style="color:var(--purple)">■</span> P/E Forward &nbsp;
+        <span style="color:#3fb95066">— 20x</span> &nbsp;
+        <span style="color:#f8514966">— 35x</span>
+      </div>
+    </div>`;
+  requestAnimationFrame(()=>{ drawTreemap(p); drawPortChart(p); drawDonut(p); drawYTDChart(p); drawPEChart(p); });
+}
+
+// ── Paleta única por ticker ──────────────────────────────────────────────────
+const TICKER_COLORS = {
+  NU:"#f78166",  SCHD:"#3fb950", BSX:"#06b6d4",  FUTU:"#ffa657", EWY:"#39d353",
+  PEP:"#8b949e", AAPL:"#58a6ff", CRM:"#d2a8ff",  GOOGL:"#4f9eff",QQQ:"#79c0ff",
+  TSM:"#bc8cff", MU:"#e3b341",   VOO:"#56d364",   META:"#ff7b72", STX:"#a5d6ff",
+  COST:"#7ee787",LLY:"#f0abfc",  MELI:"#ffa198",  ASML:"#cae8ff",
+};
+
+
+// ── TREEMAP ──────────────────────────────────────────────────────────────────
+// Logos — múltiples fuentes SVG/PNG con fallback automático
+// Usamos Yahoo Finance como fuente principal (siempre disponible)
+// + logos SVG inline como fallback definitivo
+
+const LOGO_SOURCES = {
+  NU:    ['https://logo.clearbit.com/nu.com.br',           'https://s.yimg.com/bu/src/img/stock_app/icon-nu.png',    null],
+  SCHD:  ['https://logo.clearbit.com/schwab.com',          'https://logo.clearbit.com/charlesschwab.com',            null],
+  BSX:   ['https://logo.clearbit.com/bostonscientific.com','https://logo.clearbit.com/bsci.com',                     null],
+  FUTU:  ['https://logo.clearbit.com/futuholdings.com',    'https://logo.clearbit.com/futuhk.com',                   null],
+  EWY:   ['https://logo.clearbit.com/ishares.com',         'https://logo.clearbit.com/blackrock.com',                null],
+  PEP:   ['https://logo.clearbit.com/pepsico.com',         'https://logo.clearbit.com/pepsi.com',                    null],
+  AAPL:  ['https://logo.clearbit.com/apple.com',           'https://logo.clearbit.com/apple.com?size=128',           null],
+  CRM:   ['https://logo.clearbit.com/salesforce.com',      'https://logo.clearbit.com/salesforce.org',               null],
+  GOOGL: ['https://logo.clearbit.com/google.com',          'https://logo.clearbit.com/abc.xyz',                      null],
+  QQQ:   ['https://logo.clearbit.com/invesco.com',         'https://logo.clearbit.com/invesco.us',                   null],
+  TSM:   ['https://logo.clearbit.com/tsmc.com',            'https://logo.clearbit.com/tsmc.com.tw',                  null],
+  MU:    ['https://logo.clearbit.com/micron.com',          'https://logo.clearbit.com/microntechnology.com',         null],
+  VOO:   ['https://logo.clearbit.com/vanguard.com',        'https://logo.clearbit.com/vanguardinvestments.com',      null],
+  META:  ['https://logo.clearbit.com/meta.com',            'https://logo.clearbit.com/facebook.com',                 null],
+  STX:   ['https://logo.clearbit.com/seagate.com',         'https://logo.clearbit.com/seagate.com?size=128',         null],
+  COST:  ['https://logo.clearbit.com/costco.com',          'https://logo.clearbit.com/costco.ca',                    null],
+  LLY:   ['https://logo.clearbit.com/lilly.com',           'https://logo.clearbit.com/eli-lilly.com',                null],
+  MELI:  ['https://logo.clearbit.com/mercadolibre.com',    'https://logo.clearbit.com/mercadopago.com',              null],
+  ASML:  ['https://logo.clearbit.com/asml.com',            'https://logo.clearbit.com/asml.nl',                      null],
+};
+
+// SVG inline fallbacks (cuando todo falla, dibuja initial con color de ticker)
+function makeSVGLogo(ticker, color){
+  const initials = ticker.length > 3 ? ticker.slice(0,2) : ticker.slice(0,3);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+    <rect width="40" height="40" rx="8" fill="${color}33" stroke="${color}66" stroke-width="1.5"/>
+    <text x="20" y="26" text-anchor="middle" font-family="Inter,sans-serif"
+      font-weight="800" font-size="${initials.length>2?11:13}" fill="${color}">${initials}</text>
+  </svg>`;
+  return 'data:image/svg+xml;base64,' + btoa(svg);
+}
+
+// Carga logo con fallback en cadena
+function loadLogoWithFallback(ticker, color, sources, onSuccess, onFail){
+  const tryNext = (idx) => {
+    if(idx >= sources.length){ onFail(); return; }
+    const url = sources[idx];
+    if(!url){ tryNext(idx+1); return; }
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload  = () => onSuccess(url);
+    img.onerror = () => tryNext(idx+1);
+    // Timeout de 4s por intento
+    const t = setTimeout(()=>{ img.src=''; tryNext(idx+1); }, 4000);
+    img.onload = ()=>{ clearTimeout(t); onSuccess(url); };
+    img.onerror = ()=>{ clearTimeout(t); tryNext(idx+1); };
+    img.src = url;
+  };
+  tryNext(0);
+}
+
+function ytdColor(ytd){
+  if(ytd >= 20)  return {bg:'#14532d', border:'#22c55e', text:'#86efac'};
+  if(ytd >= 10)  return {bg:'#15803d', border:'#4ade80', text:'#bbf7d0'};
+  if(ytd >= 0)   return {bg:'#166534', border:'#16a34a', text:'#4ade80'};
+  if(ytd >= -10) return {bg:'#991b1b', border:'#ef4444', text:'#fca5a5'};
+                 return {bg:'#7f1d1d', border:'#dc2626', text:'#fca5a5'};
+}
+
+// Squarified Treemap algorithm
+function squarify(items, x, y, w, h){
+  if(!items.length) return [];
+  const total = items.reduce((s,i)=>s+i.value,0);
+  const rects = [];
+  function layout(nodes, x, y, w, h){
+    if(!nodes.length) return;
+    if(nodes.length===1){
+      rects.push({...nodes[0], x, y, w, h}); return;
+    }
+    const totalV = nodes.reduce((s,n)=>s+n.value,0);
+    // Try horizontal split
+    let best = Infinity, splitIdx = 1, cumV = 0;
+    for(let i=0;i<nodes.length-1;i++){
+      cumV += nodes[i].value;
+      const ratio1 = (cumV/totalV)*h, ratio2 = ((totalV-cumV)/totalV)*h;
+      const w1 = w, w2 = w;
+      const aspect = Math.max(w1/ratio1, ratio1/w1, w2/ratio2, ratio2/w2);
+      if(aspect < best){ best=aspect; splitIdx=i+1; }
+    }
+    const splitV = nodes.slice(0,splitIdx).reduce((s,n)=>s+n.value,0);
+    const splitH = (splitV/totalV)*h;
+    // Lay out first group (horizontal strip)
+    let cx=x;
+    nodes.slice(0,splitIdx).forEach(n=>{
+      const nw=(n.value/splitV)*w;
+      rects.push({...n, x:cx, y, w:nw, h:splitH});
+      cx+=nw;
+    });
+    layout(nodes.slice(splitIdx), x, y+splitH, w, h-splitH);
+  }
+  // Sort by value desc and do squarify properly
+  const sorted=[...items].sort((a,b)=>b.value-a.value);
+  function sq(nodes,x,y,w,h){
+    if(!nodes.length) return;
+    if(nodes.length===1){ rects.push({...nodes[0],x,y,w,h}); return; }
+    const totalVal=nodes.reduce((s,n)=>s+n.value,0);
+    // Try both orientations and pick better
+    let best=Infinity, bi=1;
+    let cv2=0;
+    for(let i=0;i<nodes.length;i++){
+      cv2+=nodes[i].value;
+      const frac=cv2/totalVal;
+      const dim = w>=h ? h*frac : w*frac;
+      const perp = w>=h ? w : h;
+      let worst=0;
+      let cf=0;
+      for(let j=0;j<=i;j++){
+        cf+=nodes[j].value;
+        const s = w>=h ? (nodes[j].value/cv2)*perp : (nodes[j].value/cv2)*perp;
+        const a = Math.max(dim/s, s/dim);
+        if(a>worst) worst=a;
+      }
+      if(worst<best){ best=worst; bi=i+1; }
+      else if(i>0) break;
+    }
+    const gV=nodes.slice(0,bi).reduce((s,n)=>s+n.value,0);
+    if(w>=h){
+      const gW=(gV/totalVal)*w;
+      let cy2=y;
+      nodes.slice(0,bi).forEach(n=>{
+        const nh=(n.value/gV)*h;
+        rects.push({...n,x,y:cy2,w:gW,h:nh});
+        cy2+=nh;
+      });
+      sq(nodes.slice(bi),x+gW,y,w-gW,h);
+    } else {
+      const gH=(gV/totalVal)*h;
+      let cx2=x;
+      nodes.slice(0,bi).forEach(n=>{
+        const nw=(n.value/gV)*w;
+        rects.push({...n,x:cx2,y,w:nw,h:gH});
+        cx2+=nw;
+      });
+      sq(nodes.slice(bi),x,y+gH,w,h-gH);
+    }
+  }
+  sq(sorted,x,y,w,h);
+  return rects;
+}
+
+function drawTreemap(p){
+  const container=document.getElementById('treemap-container');
+  if(!container) return;
+  container.innerHTML=''; // clear
+
+  const W=container.offsetWidth||container.parentElement.offsetWidth||900;
+  const H=Math.max(420, Math.round(W*0.48));
+  container.style.height=H+'px';
+
+  const items=p.rows.map(r=>({
+    ticker:r.t, name:r.n, value:r.value, ytd:r.ytd, weight:r.w*100,
+    price:r.price, gain:r.gain, sc:r.sc
+  }));
+
+  const GAP=2;
+  const rects=squarify(items, GAP, GAP, W-GAP*2, H-GAP*2);
+
+  // Preload all logos
+  const imgCache={};
+  let loaded=0;
+  const total=rects.length;
+
+  function renderAll(){
+    container.innerHTML='';
+    rects.forEach(rect=>{
+      if(rect.w<4||rect.h<4) return;
+      const col=ytdColor(rect.ytd);
+      const cell=document.createElement('div');
+      cell.style.cssText=`
+        position:absolute;
+        left:${rect.x}px; top:${rect.y}px;
+        width:${Math.max(rect.w-GAP,1)}px;
+        height:${Math.max(rect.h-GAP,1)}px;
+        background:${col.bg};
+        border:1.5px solid ${col.border}44;
+        border-radius:6px;
+        overflow:hidden;
+        box-sizing:border-box;
+        display:flex; flex-direction:column;
+        align-items:center; justify-content:center;
+        transition:filter .15s, transform .15s;
+        cursor:pointer;
+        padding:4px;
+      `;
+
+      const minDim=Math.min(rect.w, rect.h);
+
+      // Logo — siempre disponible (real o SVG fallback)
+      if(minDim>44 && imgCache[rect.ticker]){
+        const img=document.createElement('img');
+        img.src=imgCache[rect.ticker];
+        const imgSize=Math.min(minDim*0.34, 40);
+        img.style.cssText=`width:${imgSize}px;height:${imgSize}px;object-fit:contain;border-radius:6px;margin-bottom:3px;flex-shrink:0;background:transparent`;
+        // Si carga mal en el DOM, reemplazar con SVG fallback
+        img.onerror=()=>{ img.src=makeSVGLogo(rect.ticker, rect.sc); };
+        cell.appendChild(img);
+      } else if(minDim>30 && !imgCache[rect.ticker]){
+        // SVG inmediato si no hay logo cacheado
+        const img=document.createElement('img');
+        img.src=makeSVGLogo(rect.ticker, rect.sc);
+        const imgSize=Math.min(minDim*0.34, 32);
+        img.style.cssText=`width:${imgSize}px;height:${imgSize}px;object-fit:contain;border-radius:6px;margin-bottom:3px;flex-shrink:0`;
+        cell.appendChild(img);
+      }
+
+      // Ticker label
+      if(minDim>28){
+        const ticker=document.createElement('div');
+        const fs=minDim>120?15:minDim>70?13:minDim>45?11:9;
+        ticker.style.cssText=`font-family:'Inter',sans-serif;font-weight:800;font-size:${fs}px;color:#ffffff;text-align:center;line-height:1.1;text-shadow:0 1px 3px rgba(0,0,0,0.8)`;
+        ticker.textContent=rect.ticker;
+        cell.appendChild(ticker);
+      }
+
+      // YTD %
+      if(minDim>40){
+        const ytdEl=document.createElement('div');
+        const fs2=minDim>100?13:minDim>60?11:9;
+        ytdEl.style.cssText=`font-family:'JetBrains Mono',monospace;font-weight:700;font-size:${fs2}px;color:${col.text};text-align:center;margin-top:2px;text-shadow:0 1px 3px rgba(0,0,0,0.8)`;
+        ytdEl.textContent=(rect.ytd>=0?'+':'')+rect.ytd.toFixed(1)+'%';
+        cell.appendChild(ytdEl);
+      }
+
+      // Value
+      if(minDim>65 && rect.w>80){
+        const valEl=document.createElement('div');
+        valEl.style.cssText=`font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,0.65);text-align:center;margin-top:2px`;
+        valEl.textContent='$'+Math.round(rect.value);
+        cell.appendChild(valEl);
+      }
+
+      // Tooltip hover
+      const tip=document.createElement('div');
+      tip.style.cssText=`
+        display:none;position:fixed;z-index:999;
+        background:#111;border:1px solid #333;border-radius:10px;
+        padding:12px 16px;font-family:'Inter',sans-serif;
+        box-shadow:0 8px 32px rgba(0,0,0,0.8);pointer-events:none;min-width:180px;
+      `;
+      tip.innerHTML=`
+        <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:6px">${rect.ticker} <span style="font-size:11px;color:#9ca3af;font-weight:400">${rect.name}</span></div>
+        <div style="font-size:12px;color:#9ca3af;line-height:1.9">
+          Valor: <b style="color:#fff">$${Math.round(rect.value)}</b><br>
+          Peso: <b style="color:${col.text}">${rect.weight.toFixed(1)}%</b><br>
+          YTD 2026: <b style="color:${col.text}">${rect.ytd>=0?'+':''}${rect.ytd.toFixed(2)}%</b><br>
+          G/P: <b style="color:${rect.gain>=0?'#4ade80':'#f87171'}">${rect.gain>=0?'+':''}$${Math.abs(rect.gain).toFixed(0)}</b><br>
+          Precio: <b style="color:#93c5fd">$${rect.price?rect.price.toFixed(2):'—'}</b>
+        </div>
+      `;
+      document.body.appendChild(tip);
+
+      cell.addEventListener('mouseenter',e=>{
+        cell.style.filter='brightness(1.3)';
+        cell.style.transform='scale(1.01)';
+        cell.style.zIndex='10';
+        tip.style.display='block';
+      });
+      cell.addEventListener('mousemove',e=>{
+        const tx=Math.min(e.clientX+14, window.innerWidth-200);
+        const ty=Math.min(e.clientY+14, window.innerHeight-160);
+        tip.style.left=tx+'px'; tip.style.top=ty+'px';
+      });
+      cell.addEventListener('mouseleave',()=>{
+        cell.style.filter=''; cell.style.transform=''; cell.style.zIndex='';
+        tip.style.display='none';
+      });
+      cell.addEventListener('click',()=>{ tip.style.display='none'; });
+
+      container.appendChild(cell);
+    });
+  }
+
+  // Load logos con fallback en cadena — render cuando todos estén listos (o fallen)
+  function checkDone(){ loaded++; if(loaded>=total) renderAll(); }
+
+  rects.forEach(rect=>{
+    const sources = LOGO_SOURCES[rect.ticker] || [];
+    const col = ytdColor(rect.ytd);
+    loadLogoWithFallback(
+      rect.ticker, rect.sc, sources,
+      (url)=>{ imgCache[rect.ticker]=url; checkDone(); },  // éxito
+      ()=>{ imgCache[rect.ticker]=makeSVGLogo(rect.ticker, rect.sc); checkDone(); }  // fallback SVG
+    );
+  });
+}
+
+// ── 1. Gráfica de línea mejorada ────────────────────────────────────────────
+function drawPortChart(p){
+  const c=document.getElementById('cv-port'); if(!c)return;
+  const portYTD=p.portRet/100, spyYTD=SPY_YTD/100;
+
+  // Series mensuales con puntos intermedios más suaves (curva Catmull-Rom)
+  const sk=[0, 0.048, -0.063, 0.038, -0.071, 0.082, 0.034];
+  const ss=[0, 0.031, -0.038, 0.014, -0.052, 0.064, 0.021];
+  const pMR=Math.pow(1+portYTD,1/5.5)-1, sMR=Math.pow(1+spyYTD,1/5.5)-1;
+  const pS=[1], sS=[1]; let pI=1,sI=1;
+  for(let i=1;i<=6;i++){pI*=(1+pMR+sk[i]*.28);pS.push(pI);sI*=(1+sMR+ss[i]*.28);sS.push(sI);}
+  pS[6]=portYTD+1; sS[6]=spyYTD+1;
+
+  const ctx=c.getContext('2d'), W=c.width, H=c.height;
+  const pad={l:68,r:90,t:30,b:44}, cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+  ctx.clearRect(0,0,W,H);
+
+  const all=[...pS,...sS], minV=Math.min(...all)*.96, maxV=Math.max(...all)*1.04;
+  const toX=i=>pad.l+i*(cW/6), toY=v=>pad.t+cH-(v-minV)/(maxV-minV)*cH;
+
+  // Fondo degradado sutil
+  const bgGr=ctx.createLinearGradient(0,pad.t,0,pad.t+cH);
+  bgGr.addColorStop(0,'#1a2030'); bgGr.addColorStop(1,'#0d1117');
+  ctx.fillStyle=bgGr; ctx.fillRect(pad.l,pad.t,cW,cH);
+
+  // Grid horizontal con labels
+  const gridLines=6;
+  for(let i=0;i<=gridLines;i++){
+    const v=minV+i*(maxV-minV)/gridLines;
+    const y=toY(v);
+    ctx.strokeStyle=i===0?'#30363d':'#1e2530';
+    ctx.lineWidth=i===0?1.5:1;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke();
+    const pct=((v-1)*100).toFixed(1);
+    ctx.fillStyle='#6e7681';ctx.font='10px monospace';ctx.textAlign='right';
+    ctx.fillText((pct>=0?'+':'')+pct+'%',pad.l-8,y+4);
+  }
+
+  // Línea cero destacada
+  const zy=toY(1);
+  ctx.strokeStyle='#3d4451';ctx.lineWidth=2;ctx.setLineDash([6,4]);
+  ctx.beginPath();ctx.moveTo(pad.l,zy);ctx.lineTo(pad.l+cW,zy);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='#6e7681';ctx.font='10px monospace';ctx.textAlign='left';
+  ctx.fillText('0%',pad.l+4,zy-5);
+
+  // Función para curva suave (Catmull-Rom → Bezier)
+  function smoothLine(ctx,pts){
+    if(pts.length<2) return;
+    ctx.moveTo(pts[0][0],pts[0][1]);
+    for(let i=0;i<pts.length-1;i++){
+      const p0=pts[Math.max(i-1,0)], p1=pts[i], p2=pts[i+1], p3=pts[Math.min(i+2,pts.length-1)];
+      const cp1x=p1[0]+(p2[0]-p0[0])/6;
+      const cp1y=p1[1]+(p2[1]-p0[1])/6;
+      const cp2x=p2[0]-(p3[0]-p1[0])/6;
+      const cp2y=p2[1]-(p3[1]-p1[1])/6;
+      ctx.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,p2[0],p2[1]);
+    }
+  }
+
+  const ptsSPY=sS.map((v,i)=>[toX(i),toY(v)]);
+  const ptsPORT=pS.map((v,i)=>[toX(i),toY(v)]);
+
+  // S&P 500 — fill area
+  ctx.beginPath();
+  smoothLine(ctx,ptsSPY);
+  ctx.lineTo(toX(6),zy);ctx.lineTo(toX(0),zy);ctx.closePath();
+  ctx.fillStyle='rgba(139,148,158,0.08)';ctx.fill();
+  // S&P 500 — línea
+  ctx.beginPath();smoothLine(ctx,ptsSPY);
+  ctx.strokeStyle='#8b949e';ctx.lineWidth=2;ctx.setLineDash([5,4]);ctx.stroke();ctx.setLineDash([]);
+
+  // Portafolio — fill area con gradiente
+  const portGr=ctx.createLinearGradient(0,pad.t,0,pad.t+cH);
+  portGr.addColorStop(0,'rgba(88,166,255,0.22)');
+  portGr.addColorStop(0.6,'rgba(88,166,255,0.06)');
+  portGr.addColorStop(1,'rgba(88,166,255,0)');
+  ctx.beginPath();smoothLine(ctx,ptsPORT);
+  ctx.lineTo(toX(6),zy);ctx.lineTo(toX(0),zy);ctx.closePath();
+  ctx.fillStyle=portGr;ctx.fill();
+  // Portafolio — línea principal
+  ctx.beginPath();smoothLine(ctx,ptsPORT);
+  ctx.strokeStyle='#58a6ff';ctx.lineWidth=3;ctx.stroke();
+
+  // Dots con glow en portafolio
+  ptsPORT.forEach(([x,y],i)=>{
+    // glow
+    ctx.beginPath();ctx.arc(x,y,7,0,Math.PI*2);
+    ctx.fillStyle='rgba(88,166,255,0.15)';ctx.fill();
+    // dot sólido
+    ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);
+    ctx.fillStyle='#58a6ff';ctx.fill();
+    ctx.strokeStyle='#0d1117';ctx.lineWidth=1.5;ctx.stroke();
+    // tooltip valor
+    const pct=((pS[i]-1)*100).toFixed(1);
+    if(i>0&&i<6){
+      ctx.fillStyle='#58a6ff';ctx.font='bold 10px monospace';ctx.textAlign='center';
+      ctx.fillText((pct>=0?'+':'')+pct+'%',x,y-12);
+    }
+  });
+  // Dots S&P
+  ptsSPY.forEach(([x,y])=>{
+    ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);
+    ctx.fillStyle='#8b949e';ctx.fill();
+  });
+
+  // Labels finales con caja
+  [[pS,'#58a6ff','Mi Portafolio'],[sS,'#8b949e','S&P 500']].forEach(([s,col,lbl],idx)=>{
+    const x=toX(6)+10, y=toY(s[6]);
+    const pct=((s[6]-1)*100).toFixed(1);
+    const txt=(pct>=0?'+':'')+pct+'%';
+    ctx.fillStyle=col+'22';
+    ctx.beginPath();ctx.roundRect(x-2,y-13,52,17,4);ctx.fill();
+    ctx.fillStyle=col;ctx.font='bold 11px monospace';ctx.textAlign='left';
+    ctx.fillText(txt,x+2,y);
+  });
+
+  // Eje X — meses
+  const months=['Inicio','Ene','Feb','Mar','Abr','May','Jun'];
+  months.forEach((l,i)=>{
+    ctx.fillStyle='#6e7681';ctx.font='11px monospace';ctx.textAlign='center';
+    ctx.fillText(l,toX(i),H-10);
+    // tick
+    ctx.strokeStyle='#30363d';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(toX(i),pad.t+cH);ctx.lineTo(toX(i),pad.t+cH+4);ctx.stroke();
+  });
+
+  // Título interno
+  ctx.fillStyle='rgba(13,17,23,0.7)';
+  ctx.beginPath();ctx.roundRect(pad.l+8,pad.t+8,220,22,4);ctx.fill();
+  ctx.fillStyle='#e6edf3';ctx.font='bold 11px monospace';ctx.textAlign='left';
+  ctx.fillText('YTD 2026  ·  actualizado live',pad.l+14,pad.t+22);
+}
+
+// ── 2. Donut Chart ───────────────────────────────────────────────────────────
+function drawDonut(p){
+  const c=document.getElementById('cv-donut'); if(!c)return;
+  const ctx=c.getContext('2d'), W=c.width, H=c.height;
+  const cx=W/2, cy=H/2, R=Math.min(W,H)/2-18, r=R*0.52;
+
+  const sorted=[...p.rows].sort((a,b)=>b.value-a.value);
+  const total=p.total;
+  let hovered=-1;
+
+  function redraw(hov){
+    ctx.clearRect(0,0,W,H);
+    let angle=-Math.PI/2;
+    sorted.forEach((row,i)=>{
+      const slice=(row.value/total)*2*Math.PI;
+      const col=TICKER_COLORS[row.t]||row.sc;
+      const isHov=i===hov;
+      const midAngle=angle+slice/2;
+      const ox=isHov?Math.cos(midAngle)*8:0;
+      const oy=isHov?Math.sin(midAngle)*8:0;
+      // segment
+      ctx.beginPath();
+      ctx.arc(cx+ox,cy+oy,R+(isHov?6:0),angle,angle+slice);
+      ctx.arc(cx+ox,cy+oy,r,angle+slice,angle,true);
+      ctx.closePath();
+      ctx.fillStyle=isHov?col:col+'cc';
+      ctx.fill();
+      ctx.strokeStyle='#000000';ctx.lineWidth=2;ctx.stroke();
+
+      // Label ticker dentro del segmento
+      const pct2=(row.value/total)*100;
+      const midA2=angle+slice/2; // midAngle before angle+=slice
+      if(pct2>=1.8){
+        const labelR = r + (R - r) * 0.52;
+        const lx2=cx+ox+Math.cos(midA2)*labelR;
+        const ly2=cy+oy+Math.sin(midA2)*labelR;
+        const fs = pct2>=6 ? 11 : pct2>=3.5 ? 9 : 7;
+        ctx.save();
+        ctx.textAlign='center';
+        ctx.textBaseline='middle';
+        // shadow for readability
+        ctx.shadowColor='rgba(0,0,0,0.9)';
+        ctx.shadowBlur=4;
+        ctx.fillStyle='#ffffff';
+        ctx.font=`bold ${fs}px Inter,sans-serif`;
+        ctx.fillText(row.t, lx2, ly2);
+        ctx.shadowBlur=0;
+        ctx.restore();
+      }
+      angle+=slice;
+    });
+    // donut hole fill
+    ctx.beginPath();ctx.arc(cx,cy,r-1,0,Math.PI*2);
+    ctx.fillStyle='#111111';ctx.fill();
+    // center text
+    if(hov>=0){
+      const row=sorted[hov];
+      const col=TICKER_COLORS[row.t]||row.sc;
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle=col;ctx.font='bold 16px Inter,sans-serif';
+      ctx.fillText(row.t,cx,cy-22);
+      ctx.fillStyle='#ffffff';ctx.font='bold 13px Inter,sans-serif';
+      ctx.fillText('$'+Math.round(row.value),cx,cy-3);
+      ctx.fillStyle='#9ca3af';ctx.font='12px Inter,sans-serif';
+      ctx.fillText((row.value/total*100).toFixed(1)+'%',cx,cy+16);
+      ctx.fillStyle=row.ytd>=0?'#4ade80':'#f87171';ctx.font='bold 12px Inter,sans-serif';
+      ctx.fillText((row.ytd>=0?'+':'')+row.ytd.toFixed(1)+'% YTD',cx,cy+34);
+      ctx.textBaseline='alphabetic';
+    } else {
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle='#9ca3af';ctx.font='11px Inter,sans-serif';
+      ctx.fillText('19 posiciones',cx,cy-12);
+      ctx.fillStyle='#93c5fd';ctx.font='bold 15px Inter,sans-serif';
+      ctx.fillText('$'+Math.round(total),cx,cy+6);
+      ctx.fillStyle='#6b7280';ctx.font='10px Inter,sans-serif';
+      ctx.fillText('valor total',cx,cy+23);
+      ctx.textBaseline='alphabetic';
+    }
+  }
+
+  redraw(-1);
+
+  c.onmousemove=function(e){
+    const rect=c.getBoundingClientRect();
+    const mx=(e.clientX-rect.left)*(W/rect.width)-cx;
+    const my=(e.clientY-rect.top)*(H/rect.height)-cy;
+    const dist=Math.sqrt(mx*mx+my*my);
+    if(dist<r||dist>R+14){if(hovered!==-1){hovered=-1;redraw(-1);}return;}
+    let a=Math.atan2(my,mx);
+    if(a<-Math.PI/2) a+=2*Math.PI;
+    let prev=-Math.PI/2, found=-1;
+    for(let i=0;i<sorted.length;i++){
+      const sl=(sorted[i].value/total)*2*Math.PI;
+      if(a>=prev&&a<prev+sl){found=i;break;}
+      prev+=sl;
+    }
+    if(found!==hovered){hovered=found;redraw(hovered);}
+  };
+  c.onmouseleave=function(){hovered=-1;redraw(-1);};
+
+  // ── Legend: tabla con todos los 17 tickers ──
+  const leg=document.getElementById('donut-legend');
+  if(!leg) return;
+  const rows3 = []; // groups of 3 cols
+  for(let i=0;i<sorted.length;i+=3) rows3.push(sorted.slice(i,i+3));
+  leg.innerHTML=`
+    <table style="width:100%;border-collapse:collapse;font-family:var(--mono)">
+      <thead>
+        <tr>
+          <th style="font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase;
+            letter-spacing:1px;padding:0 0 8px 0;text-align:left;border-bottom:1px solid #1e1e1e" colspan="3">
+            Ticker &nbsp;&nbsp;&nbsp; % &nbsp;&nbsp;&nbsp; Valor USD
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        ${sorted.map((r,i)=>{
+          const pct=(r.value/total*100).toFixed(1);
+          const col=TICKER_COLORS[r.t]||r.sc;
+          const isEven=i%2===0;
+          return`<tr style="background:${isEven?'transparent':'rgba(255,255,255,0.02)'}">
+            <td style="padding:5px 4px 5px 0">
+              <div style="display:flex;align-items:center;gap:7px">
+                <span style="width:11px;height:11px;border-radius:3px;background:${col};
+                  flex-shrink:0;display:inline-block;box-shadow:0 0 6px ${col}66"></span>
+                <span style="font-size:12px;font-weight:700;color:${col}">${r.t}</span>
+              </div>
+            </td>
+            <td style="padding:5px 8px;text-align:right;font-size:12px;font-weight:700;color:#ffffff">${pct}%</td>
+            <td style="padding:5px 0 5px 4px;text-align:right;font-size:11px;color:#6b7280">$${Math.round(r.value)}</td>
+          </tr>`;
+        }).join('')}
+        <tr style="border-top:1px solid #222222">
+          <td style="padding:7px 4px 0 0;font-size:11px;font-weight:700;color:#9ca3af">TOTAL</td>
+          <td style="padding:7px 8px 0;text-align:right;font-size:12px;font-weight:800;color:#93c5fd">100%</td>
+          <td style="padding:7px 0 0 4px;text-align:right;font-size:11px;font-weight:700;color:#93c5fd">$${Math.round(total)}</td>
+        </tr>
+      </tbody>
+    </table>`;
+}
+
+function redrawDonut_unused(ctx,W,H,cx,cy,R,r,sorted,total,hovered){
+  // kept for reference — replaced by inline redraw above
+  if(hovered>=0){
+    const row=sorted[hovered];
+    const col=TICKER_COLORS[row.t]||row.sc;
+    ctx.fillStyle=col;ctx.font='bold 14px monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(row.t,cx,cy-20);
+    ctx.fillStyle='#e6edf3';ctx.font='bold 13px monospace';
+    ctx.fillText('$'+Math.round(row.value),cx,cy);
+    ctx.fillStyle='#8b949e';ctx.font='11px monospace';
+    ctx.fillText((row.value/total*100).toFixed(1)+'%',cx,cy+18);
+    ctx.fillStyle=row.ytd>=0?'#3fb950':'#f85149';ctx.font='bold 11px monospace';
+    ctx.fillText((row.ytd>=0?'+':'')+row.ytd.toFixed(1)+'%',cx,cy+34);
+    ctx.textBaseline='alphabetic';
+  }
+}
+
+// ── 3. YTD Barras horizontales ───────────────────────────────────────────────
+function drawYTDChart(p){
+  const c=document.getElementById('cv-ytd'); if(!c)return;
+  const rows=[...p.rows].sort((a,b)=>b.ytd-a.ytd);
+  const ctx=c.getContext('2d'), W=c.width, H=c.height;
+  const pad={l:50,r:80,t:16,b:16}, cH=H-pad.t-pad.b;
+  const rowH=cH/rows.length, barH=rowH*0.62;
+  ctx.clearRect(0,0,W,H);
+
+  const maxAbs=Math.max(...rows.map(r=>Math.abs(r.ytd)))*1.08;
+  const cW=W-pad.l-pad.r;
+  const zeroX=pad.l+cW/2;
+
+  // Grid verticals
+  [-100,-50,0,50,100,150].forEach(v=>{
+    if(Math.abs(v)>maxAbs) return;
+    const x=zeroX+(v/maxAbs)*(cW/2);
+    ctx.strokeStyle=v===0?'#3d4451':'#1e2530';
+    ctx.lineWidth=v===0?1.5:1;
+    ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+cH);ctx.stroke();
+    if(v!==0){
+      ctx.fillStyle='#3d4451';ctx.font='9px monospace';ctx.textAlign='center';
+      ctx.fillText(v+'%',x,pad.t+cH+12);
+    }
+  });
+  // Zero label
+  ctx.fillStyle='#6e7681';ctx.font='9px monospace';ctx.textAlign='center';
+  ctx.fillText('0%',zeroX,pad.t+cH+12);
+
+  rows.forEach((r,i)=>{
+    const y=pad.t+i*rowH+rowH/2;
+    const col=TICKER_COLORS[r.t]||r.sc;
+    const barW=(Math.abs(r.ytd)/maxAbs)*(cW/2);
+    const x=r.ytd>=0?zeroX:zeroX-barW;
+
+    // Barra con gradiente
+    const gr=ctx.createLinearGradient(x,0,x+barW,0);
+    if(r.ytd>=0){gr.addColorStop(0,col+'66');gr.addColorStop(1,col+'ee');}
+    else{gr.addColorStop(0,col+'ee');gr.addColorStop(1,col+'66');}
+
+    // Rounded bar
+    ctx.beginPath();
+    ctx.roundRect(x,y-barH/2,barW,barH,3);
+    ctx.fillStyle=gr;ctx.fill();
+
+    // Ticker label izquierda
+    ctx.fillStyle=col;ctx.font='bold 11px monospace';ctx.textAlign='right';
+    ctx.fillText(r.t,pad.l-6,y+4);
+
+    // Valor label derecha de la barra
+    const lx=r.ytd>=0?zeroX+barW+4:zeroX-barW-4;
+    ctx.fillStyle=r.ytd>=0?'#3fb950':'#f85149';
+    ctx.font='bold 10px monospace';
+    ctx.textAlign=r.ytd>=0?'left':'right';
+    ctx.fillText((r.ytd>=0?'+':'')+r.ytd.toFixed(1)+'%',lx,y+4);
+
+    // Línea de separación sutil
+    if(i<rows.length-1){
+      ctx.strokeStyle='#1e2530';ctx.lineWidth=0.5;
+      ctx.beginPath();ctx.moveTo(pad.l,pad.t+(i+1)*rowH);ctx.lineTo(W-pad.r,pad.t+(i+1)*rowH);ctx.stroke();
+    }
+  });
+}
+
+// ── 4. PE Chart mejorado ─────────────────────────────────────────────────────
+function drawPEChart(p){
+  const c=document.getElementById('cv-pe'); if(!c)return;
+  const rows=[...p.rows].filter(r=>(r.pe&&r.pe>0)||(r.fpe&&r.fpe>0)).sort((a,b)=>(b.pe||0)-(a.pe||0));
+  const ctx=c.getContext('2d'), W=c.width, H=c.height, pad={l:54,r:20,t:28,b:40};
+  const cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+  ctx.clearRect(0,0,W,H);
+  const maxPE=Math.max(...rows.map(r=>Math.max(r.pe||0,r.fpe||0)))*1.12;
+  const gW=cW/rows.length, bW=gW*.36;
+
+  // Zona verde (<20x)
+  const y20=pad.t+cH-(20/maxPE)*cH;
+  ctx.fillStyle='rgba(63,185,80,0.04)';
+  ctx.fillRect(pad.l,y20,cW,pad.t+cH-y20);
+
+  // Líneas referencia
+  [20,35].forEach(ref=>{
+    const y=pad.t+cH-(ref/maxPE)*cH;
+    ctx.strokeStyle=ref===20?'#3fb95055':'#f8514955';
+    ctx.lineWidth=1.5;ctx.setLineDash([5,3]);
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=ref===20?'#3fb950':'#f85149';ctx.font='bold 10px monospace';ctx.textAlign='left';
+    ctx.fillText(ref+'x',pad.l+3,y-4);
+  });
+
+  // Grid horizontal
+  [0,20,40,60].forEach(v=>{
+    const y=pad.t+cH-(v/maxPE)*cH;
+    ctx.strokeStyle='#1e2530';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke();
+    ctx.fillStyle='#6e7681';ctx.font='9px monospace';ctx.textAlign='right';
+    ctx.fillText(v+'x',pad.l-4,y+3);
+  });
+
+  rows.forEach((r,i)=>{
+    const cx2=pad.l+i*gW+gW/2;
+    const col=TICKER_COLORS[r.t]||r.sc;
+    if(r.pe&&r.pe>0){
+      const bH=(r.pe/maxPE)*cH;
+      ctx.beginPath();ctx.roundRect(cx2-bW-2,pad.t+cH-bH,bW,bH,3);
+      ctx.fillStyle=col+'88';ctx.fill();
+      ctx.fillStyle=col;ctx.font='bold 9px monospace';ctx.textAlign='center';
+      ctx.fillText(r.pe.toFixed(0)+'x',cx2-bW/2-2,pad.t+cH-bH-4);
+    }
+    if(r.fpe&&r.fpe>0){
+      const bH=(r.fpe/maxPE)*cH;
+      ctx.beginPath();ctx.roundRect(cx2+2,pad.t+cH-bH,bW,bH,3);
+      ctx.fillStyle=col+'44';ctx.fill();
+      ctx.strokeStyle=col+'88';ctx.lineWidth=1;ctx.stroke();
+      ctx.fillStyle=col+'cc';ctx.font='bold 9px monospace';ctx.textAlign='center';
+      ctx.fillText(r.fpe.toFixed(0)+'x',cx2+bW/2+2,pad.t+cH-bH-4);
+    }
+    ctx.fillStyle='#8b949e';ctx.font='10px monospace';ctx.textAlign='center';
+    ctx.fillText(r.t,cx2,H-10);
+  });
+}
+
+/* ── POSICIONES ── */
+function rPosiciones(p){
+  // Ordenar por PESO descendente (mayor valor primero)
+  const sorted=[...p.rows].sort((a,b)=>b.value-a.value);
+  const maxW=sorted[0].w*100;
+  const tbody=sorted.map((r,i)=>{
+    const pesoPct=(r.w*100).toFixed(1);
+    const pesoBarW=(r.w*100/maxW*100).toFixed(0);
+    const pesoBar=`<div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+      <div style="width:48px;background:#1e1e1e;border-radius:3px;height:6px;overflow:hidden;flex-shrink:0">
+        <div style="width:${pesoBarW}%;height:100%;background:${r.sc};border-radius:3px"></div>
+      </div>
+      <span style="font-weight:700;color:${r.sc};min-width:34px;text-align:right;font-family:var(--mono)">${pesoPct}%</span>
+    </div>`;
+    const ytdYTD=r.gainYTDPct||r.ytdYTD||0;
+    const gainTot=r.gainTotalPct||r.ytd||0;
+    return`<tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="color:var(--muted);font-size:10px;min-width:18px;text-align:right">#${i+1}</span>
+          <span class="tbadge" style="background:${r.sc}33;color:${r.sc}">${r.t}</span>
+        </div>
+      </td>
+      <td style="color:var(--muted2);font-size:11px">${r.n}</td>
+      <td class="r" style="color:var(--accent);font-weight:700;font-family:var(--mono)">${fp(r.price)}</td>
+      <td class="r" style="font-size:11px;color:var(--muted);font-family:var(--mono)">${r.s.toFixed(5)}</td>
+      <td class="r" style="font-weight:800;font-family:var(--mono)">
+        <div>${fp(r.value)}</div>
+        <div style="font-size:10px;color:#6b7280">${fuMXN(r.value*TC_MXN)} MXN</div>
+      </td>
+      <td class="r">${pesoBar}</td>
+      <td class="r" style="font-weight:700;color:${cv(ytdYTD)};font-family:var(--mono)">
+        <div>${ar(ytdYTD)} ${Math.abs(ytdYTD).toFixed(1)}%</div>
+        <div style="font-size:9px;color:var(--muted)">YTD 2026</div>
+      </td>
+      <td class="r" style="font-weight:700;color:${cv(gainTot)};font-family:var(--mono)">
+        <div>${ar(gainTot)} ${Math.abs(gainTot).toFixed(1)}%</div>
+        <div style="font-size:9px;color:var(--muted)">Total</div>
+      </td>
+      <td class="r" style="font-weight:700;color:${cv(r.gainYTD||r.gain)};font-family:var(--mono)">
+        <div>${(r.gainYTD||r.gain)>=0?'+':''}${fu(r.gainYTD||r.gain)}</div>
+        <div style="font-size:9px;color:var(--muted)">G/P USD</div>
+      </td>
+      <td class="r">${peBadge(r.pe)}</td>
+      <td class="r">${fpeBadge(r.fpe)}</td>
+      <td class="r">${pegBadge(r.peg)}</td>
+      <td class="r" style="color:${r.beta>1.5?'var(--red)':r.beta>1.2?'var(--yellow2)':'var(--green2)'};font-family:var(--mono)">${r.beta.toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+  const sMap={};
+  p.rows.forEach(r=>{sMap[r.sec]=(sMap[r.sec]||0)+r.w*100;});
+  const secBars=Object.entries(sMap).sort((a,b)=>b[1]-a[1]).map(([sec,pct])=>{
+    const col=p.rows.find(r=>r.sec===sec)?.sc||'#58a6ff';
+    return`<div class="br">
+      <div style="width:90px;font-size:10px;color:${col};text-align:right">${sec}</div>
+      <div class="bt"><div class="bf" style="width:${pct}%;background:${col}bb"></div></div>
+      <div class="bv" style="color:var(--muted)">${pct.toFixed(1)}%</div>
+    </div>`;
+  }).join('');
+  document.getElementById('p-posiciones').innerHTML=`
+    <div class="sec" style="overflow-x:auto">
+      <div style="font-size:11px;color:var(--muted2);margin-bottom:10px">
+        📌 Ordenado por <b style="color:var(--text2)">peso en portafolio</b> (mayor a menor)
+      </div>
+      <table class="tbl">
+        <thead><tr>
+          <th># Ticker</th><th>Nombre</th>
+          <th class="r" style="color:var(--accent)">Precio Live</th>
+          <th class="r">Shares</th>
+          <th class="r" style="color:var(--accent)">Valor USD</th>
+          <th class="r" style="color:var(--green2)">Peso %</th>
+          <th class="r" style="color:var(--yellow2)">YTD 2026</th>
+          <th class="r" style="color:var(--teal2)">% Total</th>
+          <th class="r">G/P USD</th>
+          <th class="r" style="color:var(--yellow)">P/E</th>
+          <th class="r" style="color:var(--purple)">Fwd P/E</th>
+          <th class="r" style="color:var(--teal)">PEG</th>
+          <th class="r">Beta</th>
+        </tr></thead>
+        <tbody>${tbody}</tbody>
+      </table>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:10px;color:var(--muted)">
+        <span>Trailing: <span class="pe-cheap">&lt;20x</span> <span class="pe-fair">20-35x</span> <span class="pe-rich">&gt;35x</span></span>
+        <span>Forward: <span class="fpe-cheap">&lt;15x</span> <span class="fpe-fair">15-30x</span> <span class="fpe-rich">&gt;30x</span></span>
+        <span>PEG: <span class="peg-value">&lt;1 barato</span> <span class="peg-fair">1-2 justo</span> <span class="peg-high">&gt;2 caro</span></span>
+      </div>
+    </div>
+    <div class="sec"><div class="sec-ttl">Concentración por Sector</div>${secBars}</div>`;
+}
+
+/* ── PEG RATIO (tab educativo + análisis) ── */
+function rPEG(p){
+  const sorted=[...p.rows].filter(r=>r.peg&&r.peg>0).sort((a,b)=>a.peg-b.peg);
+
+  // Gráfica de barras PEG
+  const maxPeg=Math.min(Math.max(...sorted.map(r=>r.peg))*1.1, 10);
+  const pegBars=sorted.map(r=>{
+    const pct=Math.min(r.peg/maxPeg*100,100);
+    const col=r.peg<1?'var(--teal)':r.peg<2?'var(--yellow)':'var(--red)';
+    const signal=r.peg<1?'🟢 Barato':r.peg<2?'🟡 Razonable':'🔴 Caro';
+    return`<div class="br" style="margin-bottom:8px">
+      <div style="width:46px;font-size:11px;color:${col};text-align:right;font-weight:700">${r.t}</div>
+      <div class="bt" style="height:22px"><div class="bf" style="width:${pct}%;background:${col}88;height:22px"></div></div>
+      <div style="width:32px;font-size:11px;font-weight:700;color:${col}">${r.peg.toFixed(2)}</div>
+      <div style="font-size:10px;color:var(--muted);min-width:90px">${signal}</div>
+      <div style="font-size:10px;color:var(--muted)">${r.fpe?.toFixed(1)}x / ${r.epsG}%</div>
+    </div>`;
+  }).join('');
+
+  // Tabla detalle PEG
+  const pegTable=sorted.map(r=>`<tr>
+    <td><span class="tbadge" style="background:${r.sc}33;color:${r.sc}">${r.t}</span></td>
+    <td style="color:var(--muted);font-size:11px">${r.n}</td>
+    <td class="r">${fpeBadge(r.fpe)}</td>
+    <td class="r" style="color:var(--orange)">${r.epsG?.toFixed(0)}%</td>
+    <td class="r">${pegBadge(r.peg)}</td>
+    <td class="r" style="font-size:11px;color:var(--muted)">${r.peg<1?'Barato vs crecimiento':r.peg<2?'Valuación justa':r.peg<4?'Premium justificable':'Premium alto'}</td>
+    <td class="r" style="font-size:11px;color:var(--muted)">${(r.w*100).toFixed(1)}%</td>
+  </tr>`).join('');
+
+  document.getElementById('p-peg').innerHTML=`
+
+    <!-- EXPLICACIÓN DEL PEG -->
+    <div class="peg-explainer">
+      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px">
+        📐 ¿Qué es el PEG Ratio?
+      </div>
+      <p style="font-size:12px;line-height:1.7;color:var(--muted);margin-bottom:10px">
+        El <b style="color:var(--text)">P/E (Price-to-Earnings)</b> te dice cuánto paga el mercado por cada dólar 
+        de utilidad que genera una empresa. El problema: no considera el crecimiento. No es lo mismo 
+        pagar 40x por una empresa que crece 40% que por una que crece 5%.
+      </p>
+      <p style="font-size:12px;line-height:1.7;color:var(--muted);margin-bottom:10px">
+        Para eso existe el <b style="color:var(--accent)">PEG (Price/Earnings to Growth)</b>: 
+        divide el P/E Forward entre la tasa de crecimiento esperada de ganancias (EPS).
+      </p>
+      <div class="peg-formula">PEG = P/E Forward ÷ Tasa de Crecimiento EPS (%)</div>
+
+      <!-- Reglas -->
+      <div style="margin-bottom:14px">
+        <div class="peg-rule" style="border-color:var(--teal)">
+          <span style="font-size:18px">🟢</span>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--teal)">PEG &lt; 1 — Barato relativo a su crecimiento</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">El mercado está pagando <i>menos</i> de lo que justifica el crecimiento esperado. Señal de oportunidad potencial. Ejemplo: MU con Forward P/E 10x y crecimiento ~170% → PEG 0.06.</div>
+          </div>
+        </div>
+        <div class="peg-rule" style="border-color:var(--yellow)">
+          <span style="font-size:18px">🟡</span>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--yellow)">PEG 1 – 2 — Valuación razonable</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">Pagas un precio justo relativo al crecimiento. El mercado descuenta eficientemente las expectativas. Zona cómoda para inversión de largo plazo.</div>
+          </div>
+        </div>
+        <div class="peg-rule" style="border-color:var(--red)">
+          <span style="font-size:18px">🔴</span>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--red)">PEG &gt; 2 — Valuación elevada</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">Pagas un premium significativo. El mercado necesita creer en ejecución casi perfecta. Ejemplo: COST con Forward P/E 47x y crecimiento ~10% → PEG 4.7. El mercado paga por la marca y previsibilidad, no solo crecimiento.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ejemplos del post -->
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px">Ejemplo del post:</div>
+      <div class="peg-examples">
+        <div class="peg-ex">
+          <div style="font-size:11px;color:var(--muted)">Empresa A</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin:6px 0">P/E 40x</div>
+          <div style="font-size:11px;color:var(--muted)">Crecimiento 40%</div>
+          <div style="font-size:20px;font-weight:700;color:var(--teal);margin:8px 0">PEG = 1.0</div>
+          <div style="font-size:10px;color:var(--teal)">✓ Más barata realmente</div>
+        </div>
+        <div class="peg-ex">
+          <div style="font-size:11px;color:var(--muted)">Empresa B</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin:6px 0">P/E 20x</div>
+          <div style="font-size:11px;color:var(--muted)">Crecimiento 10%</div>
+          <div style="font-size:20px;font-weight:700;color:var(--yellow);margin:8px 0">PEG = 2.0</div>
+          <div style="font-size:10px;color:var(--yellow)">⚠ Aparenta ser más barata</div>
+        </div>
+        <div class="peg-ex">
+          <div style="font-size:11px;color:var(--muted)">SpaceX / Tesla</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin:6px 0">P/E muy alto</div>
+          <div style="font-size:11px;color:var(--muted)">Crecimiento moderado</div>
+          <div style="font-size:20px;font-weight:700;color:var(--red);margin:8px 0">PEG ~4.7</div>
+          <div style="font-size:10px;color:var(--red)">⛔ Requiere ejecución perfecta</div>
+        </div>
+      </div>
+
+      <!-- Limitaciones -->
+      <div style="background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:6px">⚠ Limitaciones importantes del PEG</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.7">
+          • El denominador son <b>estimaciones</b> de analistas — si el crecimiento decepciona, el PEG se distorsiona.<br>
+          • No funciona bien en empresas cíclicas (como semis) donde el crecimiento actual puede ser el pico del ciclo.<br>
+          • Mejor usarlo para comparar empresas <b>del mismo sector</b>, no entre sectores diferentes.<br>
+          • Empresas como COST tienen PEG alto porque el mercado paga premium por previsibilidad, no solo crecimiento.<br>
+          • Complementa con P/E, P/FCF, EV/EBITDA antes de tomar decisiones.
+        </div>
+      </div>
+    </div>
+
+    <!-- ANÁLISIS DE TU PORTAFOLIO -->
+    <div class="sec">
+      <div class="sec-ttl">PEG Ratio — Tu Portafolio (ordenado mejor a peor)</div>
+      ${pegBars}
+    </div>
+
+    <div class="sec" style="overflow-x:auto">
+      <div class="sec-ttl">Tabla Detalle PEG</div>
+      <table class="tbl">
+        <thead><tr>
+          <th>Ticker</th><th>Nombre</th>
+          <th class="r" style="color:var(--purple)">P/E Fwd</th>
+          <th class="r" style="color:var(--orange)">EPS Growth</th>
+          <th class="r" style="color:var(--teal)">PEG</th>
+          <th class="r">Señal</th>
+          <th class="r">Peso</th>
+        </tr></thead>
+        <tbody>${pegTable}</tbody>
+      </table>
+    </div>
+
+    <div class="cards">
+      ${card('PEG Ponderado',p.portPEG.toFixed(2),'Portafolio promedio',p.portPEG<1?'var(--teal)':p.portPEG<2?'var(--yellow)':'var(--red)')}
+      ${card('PEG < 1',p.rows.filter(r=>r.peg&&r.peg>0&&r.peg<1).length+' posiciones','Baratas vs crecimiento','var(--teal)')}
+      ${card('PEG 1–2',p.rows.filter(r=>r.peg&&r.peg>=1&&r.peg<2).length+' posiciones','Valuación justa','var(--yellow)')}
+      ${card('PEG > 2',p.rows.filter(r=>r.peg&&r.peg>=2).length+' posiciones','Premium elevado','var(--red)')}
+    </div>`;
+}
+
+/* ── RIESGO ── */
+function rRiesgo(p){
+  const{portBeta,annVol,rows,total}=p;
+  const betaBars=[...rows].sort((a,b)=>b.beta-a.beta).map(r=>{
+    const col=r.beta>1.6?'var(--red)':r.beta>1.3?'var(--yellow)':'var(--green)';
+    return`<div class="br">
+      <div class="bl">${r.t}</div>
+      <div class="bt"><div class="bf" style="width:${(r.beta/2)*100}%;background:${col}"></div></div>
+      <div style="width:40px;font-size:11px;color:var(--muted)">β${r.beta.toFixed(2)}</div>
+      <div style="width:60px;font-size:11px;color:var(--muted);text-align:right">${(r.w*100).toFixed(1)}%</div>
+    </div>`;
+  }).join('');
+  const stress=[
+    {lbl:'Corrección leve S&P −5%',d:-5},{lbl:'Corrección moderada S&P −15%',d:-15},
+    {lbl:'Bear Market S&P −30%',d:-30},{lbl:'Rally moderado S&P +15%',d:15},{lbl:'Bull fuerte S&P +25%',d:25},
+  ].map(s=>{
+    const imp=portBeta*s.d, dusd=total*imp/100;
+    return`<div class="srow">
+      <div style="font-size:12px">${s.lbl}</div>
+      <div style="display:flex;gap:16px;text-align:right">
+        <span style="font-weight:700;color:${cv(imp)}">${fpc(imp,1)}</span>
+        <span style="color:${cv(dusd)};min-width:80px">${dusd>=0?'+':''}${fu(dusd)}</span>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('p-riesgo').innerHTML=`
+    <div class="cards">
+      ${card('Beta Portafolio',portBeta.toFixed(3),'1.0 = mercado neutro',portBeta>1.3?'var(--yellow)':'var(--green)')}
+      ${card('Vol. Anualizada',annVol.toFixed(1)+'%','Dispersión ponderada',annVol>50?'var(--red)':'var(--yellow)')}
+      ${card('VaR 95% (6m)',mcR?fu(total-mcR.p10):'...','Pérdida máx probable','var(--red)')}
+      ${card('Upside P90',mcR?'+'+((mcR.p90/total-1)*100).toFixed(0)+'%':'...','Escenario optimista','var(--green)')}
+    </div>
+    <div class="sec"><div class="sec-ttl">Beta por Posición</div>${betaBars}</div>
+    <div class="sec">
+      <div class="sec-ttl">Análisis de Stress — Escenarios de Mercado</div>
+      ${stress}
+      <div style="font-size:11px;color:var(--muted);margin-top:10px">* Estimación lineal vía β=${portBeta.toFixed(2)}.</div>
+    </div>`;
+}
+
+/* ── MONTE CARLO ── */
+function rMonteCarlo(p){
+  const m=mcR, tv=p.total; if(!m) return;
+  const percs=[
+    {lbl:'Percentil 10 — Escenario adverso',v:m.p10},
+    {lbl:'Percentil 25 — Escenario moderado bajo',v:m.p25},
+    {lbl:'Percentil 50 — Escenario base (mediana)',v:m.p50},
+    {lbl:'Percentil 75 — Escenario favorable',v:m.p75},
+    {lbl:'Percentil 90 — Escenario optimista',v:m.p90},
+  ].map(pp=>{
+    const chg=(pp.v/tv-1)*100;
+    return`<div class="srow">
+      <div style="font-size:12px">${pp.lbl}</div>
+      <div style="display:flex;gap:12px;text-align:right">
+        <span style="font-weight:700;color:${cv(chg)}">${fpc(chg,1)}</span>
+        <span style="color:var(--muted);min-width:80px">${fu(pp.v)}</span>
+      </div>
+    </div>`;
+  }).join('');
+  const probs=[
+    {lbl:'Probabilidad de ganar +10% o más',pct:m.probUp10,col:'var(--green)'},
+    {lbl:'Probabilidad de retorno positivo', pct:m.probPos, col:'var(--teal)'},
+    {lbl:'Probabilidad de pérdida >10%',     pct:m.probDn10,col:'var(--red)'},
+  ].map(pp=>`<div class="prow">
+    <div style="flex:1">
+      <div style="font-size:12px;margin-bottom:4px">${pp.lbl}</div>
+      <div class="pt"><div class="pf" style="width:${pp.pct}%;background:${pp.col}"></div></div>
+    </div>
+    <div class="pp" style="color:${pp.col}">${pp.pct.toFixed(0)}%</div>
+  </div>`).join('');
+  document.getElementById('p-montecarlo').innerHTML=`
+    <div class="cards">
+      ${card('P10 (pesimista)',fu(m.p10),'−'+((1-m.p10/tv)*100).toFixed(1)+'% desde hoy','var(--red)')}
+      ${card('P50 (mediana)',  fu(m.p50),'+'+((m.p50/tv-1)*100).toFixed(1)+'%','var(--yellow)')}
+      ${card('P90 (optimista)',fu(m.p90),'+'+((m.p90/tv-1)*100).toFixed(1)+'%','var(--green)')}
+      ${card('Prob. retorno +',m.probPos.toFixed(0)+'%','Valor > actual en 6 meses',m.probPos>=60?'var(--green)':'var(--yellow)')}
+    </div>
+    <div class="sec">
+      <div class="sec-ttl">Distribución — 1,200 Simulaciones / 6 Meses</div>
+      <canvas id="mc-cv" width="900" height="200" style="width:100%;border-radius:6px;display:block"></canvas>
+      <div style="display:flex;gap:16px;margin-top:8px;font-size:10px;color:var(--muted)">
+        <span style="color:var(--red)">■</span> Pérdida &nbsp;
+        <span style="color:var(--accent)">■</span> Neutro ±10% &nbsp;
+        <span style="color:var(--green)">■</span> Ganancia >10% &nbsp;
+        <span style="color:var(--yellow)">—</span> Valor actual
+      </div>
+    </div>
+    <div class="sec"><div class="sec-ttl">Percentiles (6 meses)</div>${percs}</div>
+    <div class="sec">
+      <div class="sec-ttl">Probabilidades de Rendimiento</div>
+      ${probs}
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6">
+        * Monte Carlo GBM μ=15% anual, σ=${p.annVol.toFixed(0)}% anualizado, 1,200 simulaciones, 6 meses.
+      </div>
+    </div>`;
+  requestAnimationFrame(()=>drawHisto(m,tv));
+}
+
+function drawHisto(m,tv){
+  const c=document.getElementById('mc-cv'); if(!c)return;
+  const ctx=c.getContext('2d'), W=c.width, H=c.height, bins=50;
+  const minV=m.p10*.82, maxV=m.p90*1.18, bsz=(maxV-minV)/bins;
+  const cnt=new Array(bins).fill(0);
+  m.all.forEach(v=>{const b=Math.min(Math.floor((v-minV)/bsz),bins-1);if(b>=0)cnt[b]++;});
+  const maxC=Math.max(...cnt), pad={l:55,r:20,t:20,b:40}, cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+  ctx.clearRect(0,0,W,H);
+  cnt.forEach((c2,i)=>{
+    const x=pad.l+i*(cW/bins), bH=(c2/maxC)*cH, val=minV+i*bsz;
+    ctx.fillStyle=val<tv?'#f8514988':val>tv*1.10?'#3fb95088':'#58a6ff88';
+    ctx.fillRect(x,pad.t+cH-bH,cW/bins-1,bH);
+  });
+  const cx=pad.l+((tv-minV)/(maxV-minV))*cW;
+  ctx.strokeStyle='#d29922';ctx.lineWidth=2;ctx.setLineDash([4,3]);
+  ctx.beginPath();ctx.moveTo(cx,pad.t);ctx.lineTo(cx,pad.t+cH);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#8b949e';ctx.font='11px monospace';ctx.textAlign='center';
+  [minV,tv,maxV].forEach(v=>{
+    const x=pad.l+((v-minV)/(maxV-minV))*cW;
+    ctx.fillText(fu(v),x,H-8);
+  });
+}
+
+/* ── GLOSARIO DE CONCEPTOS ── */
+function rGlosario(){
+  const conceptos=[
+    {icon:'📊',nombre:'Retorno YTD',color:'var(--accent2)',
+     formula:'(Precio Actual - Precio Inicio de Año) / Precio Inicio de Año x 100',
+     def:'Rendimiento porcentual de una posición desde el 1 de enero hasta hoy.',
+     ejemplo:'AAPL subio de $258 a $342 — YTD = +32.4%',
+     cuando:'Compara el desempeno de tus posiciones en el ano en curso.'},
+    {icon:'🎯',nombre:'Alpha (α)',color:'var(--green2)',
+     formula:'α = Retorno Portafolio - [Rf + β × (Rm - Rf)]',
+     def:'Retorno que generas POR ENCIMA de lo esperado dado el riesgo que tomas. Alpha positivo = estas creando valor mas alla del mercado.',
+     ejemplo:'S&P sube 10%, tu beta es 1.2 y tu portafolio sube 15% → alpha = +3%',
+     cuando:'Entre mas alto mejor. Alpha negativo = el mercado te gana sin esfuerzo.'},
+    {icon:'⚡',nombre:'Sharpe Ratio',color:'var(--yellow2)',
+     formula:'Sharpe = (Rp - Rf) / σ  [Rp=retorno portafolio, Rf=tasa libre riesgo, σ=volatilidad]',
+     def:'Cuanto retorno EXTRA obtienes por cada unidad de riesgo asumido. Normaliza el retorno por la volatilidad para comparaciones justas.',
+     ejemplo:'Sharpe 1.5 = muy bueno. Sharpe 0.5 = moderado. Sharpe negativo = tomas mas riesgo del que te pagan.',
+     cuando:'Mayor a 1 excelente · 0.5 a 1 bueno · menor a 0.5 mejorable.'},
+    {icon:'🔢',nombre:'Beta (β)',color:'var(--orange)',
+     formula:'β = Covarianza(Portafolio, Mercado) / Varianza(Mercado)',
+     def:'Que tan volatil es tu portafolio relativo al S&P 500 (β=1.0). Beta 1.3 = si el S&P cae 10%, tu portafolio cae ~13%.',
+     ejemplo:'MU tiene β 1.62 → amplifica los movimientos en 62%. PEP tiene β 0.58 → mucho mas estable.',
+     cuando:'β menor a 1 = defensivo · β igual a 1 = igual que mercado · β mayor a 1.3 = agresivo/volatil.'},
+    {icon:'💥',nombre:'Volatilidad Anualizada',color:'var(--red2)',
+     formula:'σ anual = Desviacion Estandar Mensual × √12',
+     def:'Que tan dispersos son los rendimientos alrededor de su promedio. Alta volatilidad = mayores subidas Y mayores caidas posibles.',
+     ejemplo:'Tu portafolio tiene ~57% de volatilidad vs S&P ~18%, impulsado por MU y EWY con retornos extremos.',
+     cuando:'Alta volatilidad + alto retorno es aceptable. El problema es volatilidad alta con retorno bajo.'},
+    {icon:'💰',nombre:'Profit Factor',color:'var(--teal2)',
+     formula:'PF = Suma de ganancias USD / Suma de perdidas USD',
+     def:'Por cada dolar que pierdes en posiciones negativas, cuantos dolares ganas en las positivas. PF mayor a 1 = ganas mas de lo que pierdes.',
+     ejemplo:'PF 2.5 → por cada $100 perdidos en PEP o COST, ganas $250 en MU o AAPL.',
+     cuando:'Mayor a 2 = excelente · 1.5 a 2 = bueno · menor a 1 = el portafolio destruye valor.'},
+    {icon:'📈',nombre:'P/E Trailing (TTM)',color:'var(--yellow2)',
+     formula:'P/E = Precio de la accion / Ganancias por accion (ultimos 12 meses)',
+     def:'Cuanto paga el mercado hoy por cada dolar de ganancia YA GENERADA en los ultimos 12 meses.',
+     ejemplo:'COST cotiza a 55x sus ganancias — el mercado confia mucho en su futuro estable.',
+     cuando:'Bajo no siempre es mejor. Alto no es malo si el crecimiento lo justifica. Contexto es clave.'},
+    {icon:'🔮',nombre:'P/E Forward',color:'var(--purple2)',
+     formula:'P/E Fwd = Precio Actual / Ganancias Estimadas Proximos 12 Meses',
+     def:'Igual que P/E pero usando ganancias ESTIMADAS futuras. Mas util porque el mercado descuenta el futuro.',
+     ejemplo:'MU: P/E trailing 51x (parece caro) pero Forward P/E 10x (muy barato) — sus ganancias explotaran este ano fiscal.',
+     cuando:'Si el Forward P/E es mucho menor al Trailing, el mercado anticipa fuerte crecimiento de ganancias.'},
+    {icon:'📐',nombre:'PEG Ratio',color:'var(--teal2)',
+     formula:'PEG = P/E Forward / Tasa de Crecimiento EPS (%)',
+     def:'Ajusta el P/E por el crecimiento esperado. Compara el precio que pagas con la velocidad a la que crece la empresa.',
+     ejemplo:'MU: Forward P/E 10 / Crecimiento EPS 170% = PEG 0.06 → extraordinariamente barato relativo a su crecimiento.',
+     cuando:'PEG menor a 1 = barato · 1 a 2 = razonable · mayor a 2 = premium elevado.'},
+    {icon:'📦',nombre:'Peso en Portafolio',color:'var(--green2)',
+     formula:'Peso % = Valor Posicion / Valor Total del Portafolio × 100',
+     def:'Que porcentaje de tu dinero esta en cada posicion. Mayor peso = mayor impacto en el rendimiento general del portafolio.',
+     ejemplo:'QQQ tiene $1,059 de ~$9,250 total → peso 11.5%. Un movimiento en QQQ impacta mas que ASML (4.8%).',
+     cuando:'Revisa concentracion. Alta concentracion puede ser intencional (alta conviccion) pero eleva el riesgo especifico.'},
+    {icon:'🎲',nombre:'Monte Carlo',color:'var(--purple)',
+     formula:'GBM: dS = S × (μ·dt + σ·√dt·Z), donde Z ~ N(0,1)',
+     def:'Simulamos 1,200 trayectorias posibles del portafolio para los proximos 6 meses usando retorno historico y volatilidad. Cada trayectoria es aleatoria pero con parametros reales.',
+     ejemplo:'P50 = escenario mas probable · P10 = adverso (10% de prob de ser peor) · P90 = optimista.',
+     cuando:'Usa P10 para planificar el peor caso. Usa P50 para expectativa realista. Nunca tomes P90 como garantia.'},
+    {icon:'🌡️',nombre:'Stress Test',color:'var(--orange)',
+     formula:'Impacto Portafolio = Caida del Mercado × Beta del Portafolio',
+     def:'Simula que pasaria con tu portafolio en diferentes escenarios de mercado, usando la Beta como multiplicador.',
+     ejemplo:'Beta portafolio 1.25. Si el S&P cae -15% → tu portafolio cae ~-18.75%.',
+     cuando:'Usalo antes de eventos de riesgo (FOMC, resultados trimestrales, elecciones). Ayuda a decidir si reducir exposicion.'},
+    {icon:'📉',nombre:'VaR (Value at Risk)',color:'var(--red2)',
+     formula:'VaR 95% = Percentil 5 inferior de la distribucion de retornos simulados',
+     def:'Perdida MAXIMA que esperarias en el 95% de los escenarios del periodo analizado. Solo el 5% de los escenarios son peores.',
+     ejemplo:'VaR 95% de $800 → en condiciones normales, 95% del tiempo no perderias mas de $800 en 6 meses.',
+     cuando:'No garantiza nada — el 5% restante puede ser mucho peor (tail risk). Complementa con escenario P10 de Monte Carlo.'},
+    {icon:'🏦',nombre:'EPS (Earnings Per Share)',color:'var(--accent2)',
+     formula:'EPS = Ganancias Netas Totales / Numero de Acciones en Circulacion',
+     def:'Ganancia generada por cada accion. Es el denominador del P/E ratio. EPS creciente = empresa mas rentable por accion.',
+     ejemplo:'AAPL EPS TTM = $8.26. Precio $342 → P/E = 342/8.26 = 41x.',
+     cuando:'EPS Forward es la estimacion de analistas. Diferencia grande entre TTM y Forward = expectativa de cambio fuerte en ganancias.'},
+  ];
+
+  const cards = conceptos.map(con=>`
+    <div class="glos-card" onclick="toggleGlos(this)" style="border-left-color:${con.color}">
+      <div class="glos-header">
+        <span style="font-size:20px">${con.icon}</span>
+        <span class="glos-title" style="color:${con.color}">${con.nombre}</span>
+        <span class="glos-arrow">▼</span>
+      </div>
+      <div class="glos-body">
+        <div class="glos-formula">${con.formula}</div>
+        <div class="glos-section"><span class="glos-label">Que es:</span> ${con.def}</div>
+        <div class="glos-section"><span class="glos-label">Ejemplo:</span> ${con.ejemplo}</div>
+        <div class="glos-section"><span class="glos-label">Cuando usarlo:</span> ${con.cuando}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('p-glosario').innerHTML=`
+    <div class="sec" style="background:transparent;border:none;padding:0 0 12px 0">
+      <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px">📖 Glosario de Conceptos</div>
+      <div style="font-size:13px;color:var(--muted2)">
+        Explicacion de cada metrica y ratio del dashboard. Toca cualquier concepto para expandirlo.
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px">
+      ${cards}
+    </div>`;
+}
+
+function toggleGlos(el){
+  const body=el.querySelector('.glos-body');
+  const arrow=el.querySelector('.glos-arrow');
+  const isOpen=body.style.display==='block';
+  body.style.display=isOpen?'none':'block';
+  arrow.textContent=isOpen?'▼':'▲';
+  el.style.background=isOpen?'#0f0f0f':'#161616';
+}
+
+
+// ─── TABS ────────────────────────────────────────────────────────────────────
+const TAB_MAP={resumen:'resumen',grafica:'fica',posiciones:'osici',peg:'peg',riesgo:'riesgo',montecarlo:'onte',glosario:'losa',gestionar:'esti'};
+function setTab(name){
+  document.querySelectorAll('.panel').forEach(e=>e.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('on'));
+  document.getElementById('p-'+name).classList.add('on');
+  document.querySelectorAll('.tab').forEach(e=>{
+    if(e.textContent.toLowerCase().includes(TAB_MAP[name])) e.classList.add('on');
+  });
+  if(name==='montecarlo'&&mcR) requestAnimationFrame(()=>drawHisto(mcR,calc().total));
+  if(name==='glosario') rGlosario();
+  if(name==='grafica'){const p=calc();requestAnimationFrame(()=>{drawTreemap(p);drawPortChart(p);drawDonut(p);drawYTDChart(p);drawPEChart(p);});}
+  if(name==='gestionar') rGestionar();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ─── GESTIONAR PORTAFOLIO ─────────────────────────────────────────────────────
+// Guarda en localStorage para persistir entre sesiones
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const STORAGE_KEY = 'portafolio_antonio_2026';
+
+// Sectores y colores disponibles para nuevas posiciones
+const SECTORES = ['Tech US','Semicon','ETF Tech','ETF Broad','ETF Dividend','ETF Korea',
+  'Fintech EM','Fintech Asia','Defensivo','Software','Salud','Energía','Otro'];
+const COLOR_PALETTE = ['#58a6ff','#3fb950','#f78166','#bc8cff','#ffa657','#39d353',
+  '#d2a8ff','#79c0ff','#ff7b72','#56d364','#e3b341','#a5d6ff','#cae8ff','#ffa198','#7ee787'];
+
+// Carga holdings desde localStorage (si existen) o usa los defaults
+function loadHoldings(){
+  try{
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if(saved){
+      const parsed = JSON.parse(saved);
+      if(Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  }catch(e){}
+  return null;
+}
+
+function saveHoldings(holdings){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(holdings)); }
+  catch(e){ console.warn('localStorage no disponible'); }
+}
+
+// Historial de operaciones
+const HISTORY_KEY = 'portafolio_historial_2026';
+function loadHistory(){ try{ return JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]'); }catch{ return []; } }
+function saveHistory(h){ try{ localStorage.setItem(HISTORY_KEY, JSON.stringify(h)); }catch{} }
+function addHistory(op){
+  const hist = loadHistory();
+  hist.unshift({...op, fecha: new Date().toLocaleString('es-MX')});
+  if(hist.length > 100) hist.pop(); // máx 100 registros
+  saveHistory(hist);
+}
+
+// ─── OPERACIONES ──────────────────────────────────────────────────────────────
+
+// Comprar / incrementar posición existente
+function opComprar(ticker, sharesNuevas, precioCompra){
+  ticker = ticker.toUpperCase().trim();
+  const idx = H.findIndex(h=>h.t===ticker);
+  if(idx>=0){
+    // Posición existente: recalcular costo promedio ponderado
+    const h = H[idx];
+    const totalShares = h.s + sharesNuevas;
+    const newCost = ((h.s * h.cost) + (sharesNuevas * precioCompra)) / totalShares;
+    H[idx] = {...h, s: totalShares, cost: newCost};
+    addHistory({op:'COMPRA', ticker, shares:sharesNuevas, precio:precioCompra,
+      nota:`Posición incrementada. Shares: ${h.s.toFixed(5)} → ${totalShares.toFixed(5)} | Costo prom: $${h.cost.toFixed(2)} → $${newCost.toFixed(2)}`});
+  } else {
+    // Posición nueva
+    const color = COLOR_PALETTE[H.length % COLOR_PALETTE.length];
+    H.push({
+      t: ticker, n: ticker, s: sharesNuevas, cost: precioCompra,
+      beta: 1.2, sec: 'Otro', sc: color,
+      pe_s: null, fpe_s: null, eps_s: null, epsG: 15
+    });
+    // Añadir al SNAP con precio de compra como base
+    SNAP[ticker] = precioCompra;
+    addHistory({op:'NUEVA', ticker, shares:sharesNuevas, precio:precioCompra,
+      nota:`Nueva posición añadida al portafolio`});
+  }
+  saveHoldings(H);
+  // Re-inicializar live data para nuevo ticker
+  if(!live[ticker]){
+    live[ticker]={price:precioCompra, ytd2026:0, betaL:1.2};
+    peData[ticker]={pe:null,fpe:null,eps:null,live:false};
+  }
+  renderAll();
+}
+
+// Vender parcial o total
+function opVender(ticker, sharesVender, precioVenta){
+  ticker = ticker.toUpperCase().trim();
+  const idx = H.findIndex(h=>h.t===ticker);
+  if(idx<0){ alert('Ticker no encontrado: '+ticker); return false; }
+  const h = H[idx];
+  if(sharesVender > h.s){ alert(`Solo tienes ${h.s.toFixed(5)} shares de ${ticker}`); return false; }
+  const ganancia = (precioVenta - h.cost) * sharesVender;
+  const gPct = ((precioVenta - h.cost) / h.cost * 100).toFixed(2);
+  if(sharesVender >= h.s * 0.9999){
+    // Cierre total
+    H.splice(idx, 1);
+    addHistory({op:'VENTA TOTAL', ticker, shares:sharesVender, precio:precioVenta,
+      nota:`Posición cerrada. G/P: ${ganancia>=0?'+':''}$${ganancia.toFixed(2)} (${gPct}%)`});
+  } else {
+    // Venta parcial — las shares restantes mantienen el mismo costo base
+    H[idx] = {...h, s: h.s - sharesVender};
+    addHistory({op:'VENTA PARCIAL', ticker, shares:sharesVender, precio:precioVenta,
+      nota:`Shares: ${h.s.toFixed(5)} → ${H[idx].s.toFixed(5)} | G/P: ${ganancia>=0?'+':''}$${ganancia.toFixed(2)} (${gPct}%)`});
+  }
+  saveHoldings(H);
+  renderAll();
+  return true;
+}
+
+// Editar costo base manualmente
+function opEditarCosto(ticker, nuevoCosto){
+  const idx = H.findIndex(h=>h.t===ticker);
+  if(idx<0) return;
+  const old = H[idx].cost;
+  H[idx] = {...H[idx], cost: nuevoCosto};
+  addHistory({op:'EDITAR COSTO', ticker, shares:H[idx].s, precio:nuevoCosto,
+    nota:`Costo base corregido: $${old.toFixed(2)} → $${nuevoCosto.toFixed(2)}`});
+  saveHoldings(H);
+  renderAll();
+}
+
+// ─── RENDER GESTIONAR ─────────────────────────────────────────────────────────
+function rGestionar(){
+  const hist = loadHistory();
+
+  const posRows = H.map(h=>{
+    const ld = live[h.t]||{};
+    const price = ld.price || SNAP[h.t] || h.cost;
+    const value = price * h.s;
+    const ytd = ((price - h.cost)/h.cost*100);
+    return `<tr>
+      <td><span class="tbadge" style="background:${h.sc}33;color:${h.sc}">${h.t}</span></td>
+      <td style="color:var(--muted);font-size:11px">${h.n}</td>
+      <td class="r">${h.s.toFixed(5)}</td>
+      <td class="r" style="color:var(--muted)">$${h.cost.toFixed(2)}</td>
+      <td class="r" style="color:var(--accent);font-weight:700">$${price.toFixed(2)}</td>
+      <td class="r" style="font-weight:700;color:${ytd>=0?'var(--green)':'var(--red)'}">${ytd>=0?'▲':'▼'} ${Math.abs(ytd).toFixed(1)}%</td>
+      <td class="r">
+        <button onclick="abrirModal('comprar','${h.t}')" class="act-btn act-buy">+ Comprar</button>
+        <button onclick="abrirModal('vender','${h.t}')"  class="act-btn act-sell">− Vender</button>
+        <button onclick="abrirModal('editar','${h.t}')"  class="act-btn act-edit">✏ Costo</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const histRows = hist.slice(0,30).map(h=>{
+    const col = h.op.includes('COMPRA')||h.op==='NUEVA' ? 'var(--green)' : h.op.includes('VENTA') ? 'var(--red)' : 'var(--yellow)';
+    return `<tr>
+      <td style="color:var(--muted);font-size:10px">${h.fecha}</td>
+      <td><span style="color:${col};font-weight:700;font-size:11px">${h.op}</span></td>
+      <td><span class="tbadge" style="background:#58a6ff22;color:var(--accent)">${h.ticker}</span></td>
+      <td class="r" style="font-size:11px">${h.shares?.toFixed(5)||'—'}</td>
+      <td class="r" style="font-size:11px;color:var(--accent)">$${h.precio?.toFixed(2)||'—'}</td>
+      <td style="font-size:10px;color:var(--muted)">${h.nota||''}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('p-gestionar').innerHTML=`
+
+    <!-- NUEVA POSICIÓN -->
+    <div class="sec" style="border-color:#1e3a5f">
+      <div class="sec-ttl" style="color:var(--accent)">➕ Agregar nueva posición o comprar más</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:6px">
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px">TICKER</div>
+          <input id="g-ticker" placeholder="Ej: NVDA" maxlength="8"
+            class="g-input" style="width:100px;text-transform:uppercase">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px">SHARES</div>
+          <input id="g-shares" type="number" placeholder="0.00000" step="0.00001" min="0.00001"
+            class="g-input" style="width:120px">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px">PRECIO DE COMPRA (USD)</div>
+          <input id="g-precio" type="number" placeholder="0.00" step="0.01" min="0.01"
+            class="g-input" style="width:130px">
+        </div>
+        <button onclick="submitCompra()"
+          class="g-btn g-btn-buy" style="height:40px">
+          ✓ Registrar compra
+        </button>
+      </div>
+      <div id="g-msg" style="font-size:11px;margin-top:6px;min-height:16px"></div>
+    </div>
+
+    <!-- TABLA POSICIONES CON ACCIONES -->
+    <div class="sec" style="overflow-x:auto">
+      <div class="sec-ttl">📋 Posiciones actuales — gestionar</div>
+      <table class="tbl">
+        <thead><tr>
+          <th>Ticker</th><th>Nombre</th>
+          <th class="r">Shares</th>
+          <th class="r">Costo Base</th>
+          <th class="r" style="color:var(--accent)">Precio Live</th>
+          <th class="r">G/P%</th>
+          <th class="r">Acciones</th>
+        </tr></thead>
+        <tbody>${posRows}</tbody>
+      </table>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div class="sec" style="overflow-x:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="sec-ttl" style="margin-bottom:0">📜 Historial de operaciones</div>
+        ${hist.length>0?`<button onclick="limpiarHistorial()"
+          style="background:#f8514922;color:var(--red);border:1px solid #f8514944;border-radius:4px;
+          padding:3px 10px;font-size:10px;cursor:pointer;font-family:inherit">🗑 Limpiar historial</button>`:''}
+      </div>
+      ${hist.length===0
+        ? `<div style="color:var(--muted);font-size:12px;padding:16px 0;text-align:center">Sin operaciones registradas aún.</div>`
+        : `<table class="tbl">
+            <thead><tr>
+              <th>Fecha</th><th>Operación</th><th>Ticker</th>
+              <th class="r">Shares</th><th class="r">Precio</th><th>Detalle</th>
+            </tr></thead>
+            <tbody>${histRows}</tbody>
+           </table>`}
+    </div>
+
+    <!-- MODAL OVERLAY -->
+    <div id="modal-overlay" class="modal-overlay" onclick="cerrarModal()">
+    </div>
+    <div id="modal-box" class="modal-box">
+      <div id="modal-content"></div>
+    </div>`;
+}
+
+function submitCompra(){
+  const ticker = document.getElementById('g-ticker').value.toUpperCase().trim();
+  const shares = parseFloat(document.getElementById('g-shares').value);
+  const precio = parseFloat(document.getElementById('g-precio').value);
+  const msg = document.getElementById('g-msg');
+  if(!ticker){ msg.style.color='var(--red)'; msg.textContent='⚠ Ingresa el ticker.'; return; }
+  if(!shares||shares<=0){ msg.style.color='var(--red)'; msg.textContent='⚠ Ingresa el número de shares.'; return; }
+  if(!precio||precio<=0){ msg.style.color='var(--red)'; msg.textContent='⚠ Ingresa el precio de compra.'; return; }
+  const esNueva = !H.find(h=>h.t===ticker);
+  opComprar(ticker, shares, precio);
+  msg.style.color='var(--green)';
+  msg.textContent = esNueva
+    ? `✓ ${ticker} agregado al portafolio — ${shares} shares a $${precio}`
+    : `✓ ${ticker} actualizado — +${shares} shares a $${precio} (costo promedio recalculado)`;
+  document.getElementById('g-ticker').value='';
+  document.getElementById('g-shares').value='';
+  document.getElementById('g-precio').value='';
+  rGestionar();
+  setTimeout(()=>{ if(document.getElementById('g-msg')) document.getElementById('g-msg').textContent=''; },5000);
+}
+
+function abrirModal(tipo, ticker){
+  const h = H.find(x=>x.t===ticker);
+  if(!h) return;
+  const price = live[ticker]?.price || SNAP[ticker] || h.cost;
+  let html='';
+
+  if(tipo==='comprar'){
+    html=`
+      <div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:16px">
+        ➕ Comprar más — <span style="color:${h.sc}">${ticker}</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px">
+        Shares actuales: <b style="color:var(--text)">${h.s.toFixed(5)}</b> &nbsp;·&nbsp;
+        Costo base: <b style="color:var(--text)">$${h.cost.toFixed(2)}</b> &nbsp;·&nbsp;
+        Precio live: <b style="color:var(--accent)">$${price.toFixed(2)}</b>
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">SHARES A COMPRAR</div>
+        <input id="m-shares" type="number" placeholder="0.00000" step="0.00001" min="0.00001" value=""
+          class="g-input">
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">PRECIO DE COMPRA (USD)</div>
+        <input id="m-precio" type="number" placeholder="${price.toFixed(2)}" step="0.01" value="${price.toFixed(2)}"
+          class="g-input">
+      </div>
+      <div id="m-preview" style="background:#0d1117;border-radius:6px;padding:10px;font-size:11px;
+        color:var(--muted);margin-bottom:14px;min-height:40px"></div>
+      <div style="display:flex;gap:10px">
+        <button onclick="confirmarModal('comprar','${ticker}')"
+          class="g-btn g-btn-buy" style="flex:1;justify-content:center">Confirmar compra</button>
+        <button onclick="cerrarModal()"
+          class="g-btn g-btn-ghost" style="flex:1;justify-content:center">Cancelar</button>
+      </div>`;
+  } else if(tipo==='vender'){
+    html=`
+      <div style="font-size:14px;font-weight:700;color:var(--red);margin-bottom:16px">
+        − Vender — <span style="color:${h.sc}">${ticker}</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px">
+        Shares actuales: <b style="color:var(--text)">${h.s.toFixed(5)}</b> &nbsp;·&nbsp;
+        Costo base: <b style="color:var(--text)">$${h.cost.toFixed(2)}</b> &nbsp;·&nbsp;
+        Precio live: <b style="color:var(--accent)">$${price.toFixed(2)}</b>
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">SHARES A VENDER</div>
+        <input id="m-shares" type="number" placeholder="0.00000" step="0.00001" min="0.00001"
+          class="g-input">
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">PRECIO DE VENTA (USD)</div>
+        <input id="m-precio" type="number" placeholder="${price.toFixed(2)}" step="0.01" value="${price.toFixed(2)}"
+          class="g-input">
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button onclick="document.getElementById('m-shares').value='${(h.s*0.25).toFixed(5)}'"
+          style="flex:1;background:#21262d;color:var(--muted);border:1px solid var(--border);
+          border-radius:4px;padding:5px;font-size:10px;font-family:inherit;cursor:pointer">25%</button>
+        <button onclick="document.getElementById('m-shares').value='${(h.s*0.5).toFixed(5)}'"
+          style="flex:1;background:#21262d;color:var(--muted);border:1px solid var(--border);
+          border-radius:4px;padding:5px;font-size:10px;font-family:inherit;cursor:pointer">50%</button>
+        <button onclick="document.getElementById('m-shares').value='${(h.s*0.75).toFixed(5)}'"
+          style="flex:1;background:#21262d;color:var(--muted);border:1px solid var(--border);
+          border-radius:4px;padding:5px;font-size:10px;font-family:inherit;cursor:pointer">75%</button>
+        <button onclick="document.getElementById('m-shares').value='${h.s.toFixed(5)}'"
+          style="flex:1;background:#f8514922;color:var(--red);border:1px solid #f8514944;
+          border-radius:4px;padding:5px;font-size:10px;font-family:inherit;cursor:pointer">100%</button>
+      </div>
+      <div id="m-preview" style="background:#0d1117;border-radius:6px;padding:10px;font-size:11px;
+        color:var(--muted);margin-bottom:14px;min-height:40px"></div>
+      <div style="display:flex;gap:10px">
+        <button onclick="confirmarModal('vender','${ticker}')"
+          class="g-btn g-btn-sell" style="flex:1;justify-content:center">Confirmar venta</button>
+        <button onclick="cerrarModal()"
+          class="g-btn g-btn-ghost" style="flex:1;justify-content:center">Cancelar</button>
+      </div>`;
+  } else if(tipo==='editar'){
+    html=`
+      <div style="font-size:14px;font-weight:700;color:var(--yellow);margin-bottom:16px">
+        ✏ Editar costo base — <span style="color:${h.sc}">${ticker}</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px">
+        Usa esto para corregir el precio de costo si fue ingresado incorrectamente.
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">NUEVO COSTO BASE (USD/share)</div>
+        <input id="m-precio" type="number" placeholder="${h.cost.toFixed(2)}" step="0.01" value="${h.cost.toFixed(2)}"
+          class="g-input">
+      </div>
+      <div style="display:flex;gap:10px">
+        <button onclick="confirmarModal('editar','${ticker}')"
+          class="g-btn g-btn-edit" style="flex:1;justify-content:center">Guardar cambio</button>
+        <button onclick="cerrarModal()"
+          class="g-btn g-btn-ghost" style="flex:1;justify-content:center">Cancelar</button>
+      </div>`;
+  }
+
+  document.getElementById('modal-content').innerHTML=html;
+  document.getElementById('modal-overlay').style.display='flex';
+  document.getElementById('modal-box').style.display='block';
+  // Preview en tiempo real para comprar/vender
+  if(tipo==='comprar'||tipo==='vender'){
+    const upd=()=>{
+      const s=parseFloat(document.getElementById('m-shares')?.value)||0;
+      const pr=parseFloat(document.getElementById('m-precio')?.value)||0;
+      const prev=document.getElementById('m-preview');
+      if(!prev||!s||!pr) return;
+      if(tipo==='comprar'){
+        const newTotal=h.s+s;
+        const newCost=((h.s*h.cost)+(s*pr))/newTotal;
+        prev.innerHTML=`Shares nuevas: <b style="color:var(--text)">${newTotal.toFixed(5)}</b>
+          &nbsp;·&nbsp; Costo prom nuevo: <b style="color:var(--accent)">$${newCost.toFixed(2)}</b>
+          &nbsp;·&nbsp; Inversión: <b style="color:var(--text)">$${(s*pr).toFixed(2)}</b>`;
+      } else {
+        const gan=(pr-h.cost)*s;
+        const gPct=((pr-h.cost)/h.cost*100).toFixed(2);
+        prev.innerHTML=`Shares restantes: <b style="color:var(--text)">${(h.s-s).toFixed(5)}</b>
+          &nbsp;·&nbsp; G/P: <b style="color:${gan>=0?'var(--green)':'var(--red)'}">
+          ${gan>=0?'+':''}$${gan.toFixed(2)} (${gPct}%)</b>`;
+      }
+    };
+    setTimeout(()=>{
+      document.getElementById('m-shares')?.addEventListener('input',upd);
+      document.getElementById('m-precio')?.addEventListener('input',upd);
+    },50);
+  }
+}
+
+function cerrarModal(){
+  document.getElementById('modal-overlay').style.display='none';
+  document.getElementById('modal-box').style.display='none';
+}
+
+function confirmarModal(tipo, ticker){
+  const shares = parseFloat(document.getElementById('m-shares')?.value)||0;
+  const precio = parseFloat(document.getElementById('m-precio')?.value)||0;
+  if((tipo==='comprar'||tipo==='vender')&&(!shares||shares<=0)){
+    alert('Ingresa el número de shares'); return;
+  }
+  if(!precio||precio<=0){ alert('Ingresa el precio'); return; }
+  cerrarModal();
+  if(tipo==='comprar') opComprar(ticker, shares, precio);
+  else if(tipo==='vender'){ if(!opVender(ticker, shares, precio)) return; }
+  else if(tipo==='editar') opEditarCosto(ticker, precio);
+  rGestionar();
+}
+
+function limpiarHistorial(){
+  if(confirm('¿Eliminar todo el historial de operaciones?')){
+    localStorage.removeItem(HISTORY_KEY);
+    rGestionar();
+  }
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+
+// Cargar holdings guardados en localStorage (si existen)
+const savedH = loadHoldings();
+if(savedH && savedH.length > 0){
+  H.length=0;
+  savedH.forEach(h=>H.push(h));
+  H.forEach(h=>{ if(!SNAP[h.t]) SNAP[h.t]=h.cost; });
+}
+
+// Inicializar live y peData con snapshot estático
+H.forEach(h=>{
+  const snapPrice = SNAP[h.t] || h.cost;
+  const ytd = ((snapPrice - h.cost) / h.cost) * 100;
+  live[h.t]  = {price:snapPrice, ytd2026:ytd, betaL:h.beta};
+  peData[h.t] = {pe:h.pe_s||null, fpe:h.fpe_s||null, eps:h.eps_s||null, epsF:null, live:false};
+});
+
+renderAll();   // render inmediato con datos estáticos
+// Yahoo Finance se actualiza al pulsar "Actualizar precios".
+// Esto evita que un proxy/CORS lento bloquee la carga inicial del dashboard.
+</script>
+</body>
+</html>
